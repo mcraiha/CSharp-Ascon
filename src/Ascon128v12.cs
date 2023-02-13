@@ -95,16 +95,6 @@ public static class Ascon128v12
 				adlen -= ASCON_AEAD_RATE;
 			}
 
-			/* final associated data block */
-			/*
-			ulong px = s.x[0];
-
-			px ^= PAD(adlen);
-			if (adlen > 0) px ^= LOAD(ad, adOffset, adlen);
-			printstate("pad adata", s);
-			P(s, nr);
-			*/
-
 			s.x[0] ^= PAD(adlen);
 			if (adlen > 0) s.x[0] ^= LOAD(ad, adOffset, adlen);
 			printstate("pad adata", s);
@@ -135,16 +125,6 @@ public static class Ascon128v12
 			cOffset += ASCON_AEAD_RATE;
 			mlen -= ASCON_AEAD_RATE;
 		}
-
-		/* final plaintext block */
-		/*ulong px = s.x[0];
-
-		px ^= PAD(mlen);
-		if (mlen > 0) 
-		{
-			px ^= LOAD(m, mOffset, mlen);
-			STORE(c, cOffset, px, mlen);
-		}*/
 
 		s.x[0] ^= PAD(mlen);
 		if (mlen > 0) 
@@ -177,19 +157,6 @@ public static class Ascon128v12
 			cOffset += ASCON_AEAD_RATE;
 			clen -= ASCON_AEAD_RATE;
 		}
-
-		/* final ciphertext block */
-		/*ulong px = s.x[0];
-		
-		px ^= PAD(clen);
-		if (clen > 0) 
-		{
-			ulong cx = LOAD(c, cOffset, clen);
-			px ^= cx;
-			STORE(m, mOffset, px, clen);
-			px = CLEAR(px, clen);
-			px ^= cx;
-		}*/
 
 		s.x[0] ^= PAD(clen);
 		if (clen > 0) 
@@ -356,22 +323,6 @@ public static class Ascon128v12
 		return x;
 	}
 
-	/*
-	[Conditional("DEBUG")]
-	public static void print(string name, byte[] var, int len, int offset) 
-	{
-		Console.Write($"{name}[{len}]=");
-
-		StringBuilder hex = new StringBuilder((int)len * 2);
-
-		for (int i = 0; i < len; ++i) 
-		{
-			hex.AppendFormat("{0:x2}", var[i+offset]);
-		}
-		Console.WriteLine(hex.ToString());
-	}
-	*/
-	//ASCON_PRINT_STATE
 	[Conditional("ASCON_PRINT_STATE")]
 	private static void printword(string text, ulong x) 
 	{

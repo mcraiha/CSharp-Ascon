@@ -86,7 +86,7 @@ namespace tests
 
 					Assert.AreEqual(mlen, mlen2, "$crypto_aead_decrypt returned bad 'mlen': Got <{mlen2}>, expected <{mlen}>");
 
-					//CollectionAssert.AreEqual(msg, msg2, "crypto_aead_decrypt did not recover the plaintext");
+					CollectionAssert.AreEqual(msg.Take(mlen), msg2.Take(mlen2), "crypto_aead_decrypt did not recover the plaintext");
 
 					// test failed verification
 					ct[0] ^= 1;
@@ -96,7 +96,7 @@ namespace tests
 				}
 			}
 			//Console.WriteLine(sw.ToString());
-			//Assert.AreEqual(sw.ToString(), File.ReadAllText());
+			Assert.AreEqual(sw.ToString(), File.ReadAllText("LWC_AEAD_KAT_128_128.txt"));
 		}
 	}
 }

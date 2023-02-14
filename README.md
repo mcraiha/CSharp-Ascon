@@ -10,7 +10,7 @@ I needed a weekend project for myself
 
 Currently the API is similar to C based one. I will create a simpler one in the future.
 
-Both Ascon-128 (Ascon128v12.cs) and Ascon-128a are standalone files, so you can copy either one of them to your project and just use it. Nuget package will arrive later on.
+Both Ascon-128 (Ascon128v12.cs) and Ascon-128a (Ascon128av12.cs) are standalone files, so you can copy either one of them to your project and just use it. Nuget package will arrive later on.
 
 ## Porting story
 
@@ -18,7 +18,7 @@ Code is ported from [opt64](https://github.com/ascon/ascon-c/tree/main/crypto_ae
 
 ## Limitations
 
-Only little-endian (LE) systems (x86, x64, ARM etc.) are supported.
+Only [little-endian](https://en.wikipedia.org/wiki/Endianness) (LE) systems (x86, x64, ARM etc.) are supported, because there aren't that many big-endian .NET environments.
 
 ## License
 
@@ -26,4 +26,4 @@ Only little-endian (LE) systems (x86, x64, ARM etc.) are supported.
 
 Original [genkat](https://github.com/ascon/ascon-c/blob/main/tests/genkat_aead.c) uses NIST license, so tests in this project are modified from it. 
 
-The tests vector files (**LWC_AEAD_KAT_128_128.txt** and ...) are also generated with genkat tool.
+The tests vector files (**LWC_AEAD_KAT_128_128.txt** and **LWC_AEAD_KAT_128_128_a.txt**) are also generated with genkat tool.

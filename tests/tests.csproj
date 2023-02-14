@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <None Update="LWC_AEAD_KAT_128_128.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="LWC_AEAD_KAT_128_128_a.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

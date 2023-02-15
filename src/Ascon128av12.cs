@@ -6,20 +6,44 @@ using System.Runtime.InteropServices;
 
 namespace CSAscon;
 
+/// <summary>
+/// Ascon128a, version 1.2
+/// </summary>
 public static class Ascon128av12
 {
 	// Defines
-	public const int CRYPTO_KEYBYTES = 16;
-	public const int CRYPTO_NSECBYTES = 0;
-	public const int CRYPTO_NPUBBYTES = 16;
-	public const int CRYPTO_ABYTES = 16;
-	public const int CRYPTO_NOOVERLAP = 1;
 
+	/// <summary>
+	/// How many bytes key must have
+	/// </summary>
+	public const int CRYPTO_KEYBYTES = 16;
+	private const int CRYPTO_NSECBYTES = 0;
+
+	/// <summary>
+	/// How many bytes nonce must have
+	/// </summary>
+	public const int CRYPTO_NPUBBYTES = 16;
+
+	/// <summary>
+	/// How many bytes tag has
+	/// </summary>
+	public const int CRYPTO_ABYTES = 16;
+	private const int CRYPTO_NOOVERLAP = 1;
+
+	/// <summary>
+	/// Initialization vector (IV) 
+	/// </summary>
 	public const ulong ASCON_128A_IV = 0x80800c0800000000ul;
 
+	/// <summary>
+	/// How many bytes are processed at one time (if available)
+	/// </summary>
 	public const int ASCON_AEAD_RATE = 16;
 
-	public const int ASCON_KEYWORDS = (CRYPTO_KEYBYTES + 7) / 8;
+	/// <summary>
+	/// How many values the key has
+	/// </summary>>
+	private const int ASCON_KEYWORDS = (CRYPTO_KEYBYTES + 7) / 8;
 
 	private const byte RC0 = 0xf0;
 	private const byte RC1 = 0xe1;
@@ -34,7 +58,10 @@ public static class Ascon128av12
 	private const byte RCa = 0x5a;
 	private const byte RCb = 0x4b;
 
-	public struct ascon_state_t
+	/// <summary>
+	/// Ascon state, known as S
+	/// </summary>
+	private struct ascon_state_t
 	{
 		public ulong[] x = new ulong[5];
 
@@ -44,7 +71,10 @@ public static class Ascon128av12
 		}
 	}
 
-	public struct ascon_key_t
+	/// <summary>
+	/// Ascon key
+	/// </summary>
+	private struct ascon_key_t
 	{
 		public ulong[] x = new ulong[ASCON_KEYWORDS];
 
@@ -393,6 +423,19 @@ public static class Ascon128av12
 		return BitOperations.RotateRight(x, n);
 	}
 
+	/// <summary>
+	/// Encrypt (lowest level method, imitates similar C based call)
+	/// </summary>
+	/// <param name="c">Encrypted byte array (the result you get, includes tag)</param>
+	/// <param name="clen">How many bytes are written to the encrypted array</param>
+	/// <param name="m">Message bytes to encrypt</param>
+	/// <param name="mlen">How many bytes will be encrypted from message bytes</param>
+	/// <param name="ad">Associated data bytes (see https://en.wikipedia.org/wiki/Authenticated_encryption#Authenticated_encryption_with_associated_data_(AEAD) )</param>
+	/// <param name="adlen">How many bytes will be uses from Associated data bytes</param>
+	/// <param name="nsec">NOT USED (only for API compatibility)</param>
+	/// <param name="npub">Nonce as bytes (must 16 bytes / 128 bits)</param>
+	/// <param name="k">Key as bytes (must 16 bytes / 128 bits)</param>
+	/// <returns>0 if everything went correctly with encryption</returns>
 	public static int crypto_aead_encrypt(byte[] c, out int clen, byte[] m, int mlen, byte[] ad, int adlen, byte[] nsec, byte[] npub, byte[] k) 
 	{
 		ascon_state_t s = new ascon_state_t();
@@ -410,6 +453,19 @@ public static class Ascon128av12
 		return 0;
 	}
 
+	/// <summary>
+	/// Decrypt (lowest level method, imitates similar C based call)
+	/// </summary>
+	/// <param name="m">Message bytes after decryption</param>
+	/// <param name="mlen">How many bytes were decrypted</param>
+	/// <param name="nsec">NOT USED (only for API compatibility)</param>
+	/// <param name="c">Encrypted byte array (one you want to decrypt)</param>
+	/// <param name="clen">How many bytes from encrypted array should be procesessed</param>
+	/// <param name="ad">Associated data bytes (see https://en.wikipedia.org/wiki/Authenticated_encryption#Authenticated_encryption_with_associated_data_(AEAD) )</param>
+	/// <param name="adlen">How many bytes will be uses from Associated data bytes</param>
+	/// <param name="npub">Nonce as bytes (must 16 bytes / 128 bits)</param>
+	/// <param name="k">Key as bytes (must 16 bytes / 128 bits)</param>
+	/// <returns>0 if everything went correctly with decryption</returns>
 	public static int crypto_aead_decrypt(byte[] m, out int mlen, byte[] nsec, byte[] c, int clen, byte[] ad, int adlen, byte[] npub, byte[] k) 
 	{
 		ascon_state_t s = new ascon_state_t();

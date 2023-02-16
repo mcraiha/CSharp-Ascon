@@ -377,6 +377,117 @@ public static class Ascon128v12
 		return BitOperations.RotateRight(x, n);
 	}
 
+	private static readonly byte[] emptyByteArray = new byte[0];
+
+	/// <summary>
+	/// Encrypt message (add associated data) with given nonce and key
+	/// </summary>
+	/// <param name="message">Message (1 - N bytes)</param>
+	/// <param name="associatedData">Associated data (0 - N bytes)</param>
+	/// <param name="nonce">Nonce (16 bytes)</param>
+	/// <param name="key">Key (16 bytes)</param>
+	/// <returns>Encrypted byte array (size is 16 bytes more than message's size)</returns>
+	public static byte[] Encrypt(ReadOnlySpan<byte> message, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
+	{
+		if (message == null)
+		{
+			throw new NullReferenceException("Message cannot be null");
+		}
+
+		if (associatedData == null)
+		{
+			throw new NullReferenceException("Associated data cannot be null");
+		}
+
+		if (nonce == null)
+		{
+			throw new NullReferenceException("Nonce cannot be null");
+		}
+
+		if (key == null)
+		{
+			throw new NullReferenceException("Key cannot be null");
+		}
+
+		if (message.Length < 1)
+		{
+			throw new ArgumentException("Message should have some bytes");
+		}
+
+		if (nonce.Length != CRYPTO_NPUBBYTES)
+		{
+			throw new ArgumentException($"Nonce must be {CRYPTO_NPUBBYTES} bytes");
+		}
+
+		if (key.Length != CRYPTO_KEYBYTES)
+		{
+			throw new ArgumentException($"Key must be {CRYPTO_KEYBYTES} bytes");
+		}
+
+		byte[] encryptedBytes = new byte[message.Length + CRYPTO_ABYTES];
+
+		crypto_aead_encrypt(encryptedBytes, out _, message.ToArray(), message.Length, associatedData.ToArray(), associatedData.Length, emptyByteArray, nonce.ToArray(), key.ToArray());
+
+		return encryptedBytes;
+	}
+
+	/// <summary>
+	/// Decrypt encoded message
+	/// </summary>
+	/// <param name="encryptedBytes">Encrypted bytes (16 - N bytes)</param>
+	/// <param name="associatedData">Associated data (0 - N bytes)</param>
+	/// <param name="nonce">Nonce (16 bytes)</param>
+	/// <param name="key">Key (16 bytes)</param>
+	/// <returns>Decrypted byte array (size is 16 bytes less than encrypted bytes's size)</returns>
+	public static byte[] Decrypt(ReadOnlySpan<byte> encryptedBytes, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
+	{
+		if (encryptedBytes == null)
+		{
+			throw new NullReferenceException("Encrypted bytes cannot be null");
+		}
+
+		if (associatedData == null)
+		{
+			throw new NullReferenceException("Associated data cannot be null");
+		}
+
+		if (nonce == null)
+		{
+			throw new NullReferenceException("Nonce cannot be null");
+		}
+
+		if (key == null)
+		{
+			throw new NullReferenceException("Key cannot be null");
+		}
+
+		if (encryptedBytes.Length < CRYPTO_ABYTES)
+		{
+			throw new ArgumentException($"Encrypted bytes should have at least {CRYPTO_ABYTES} bytes");
+		}
+
+		if (nonce.Length != CRYPTO_NPUBBYTES)
+		{
+			throw new ArgumentException($"Nonce must be {CRYPTO_NPUBBYTES} bytes");
+		}
+
+		if (key.Length != CRYPTO_KEYBYTES)
+		{
+			throw new ArgumentException($"Key must be {CRYPTO_KEYBYTES} bytes");
+		}
+
+		byte[] decryptedBytes = new byte[encryptedBytes.Length - CRYPTO_ABYTES];
+
+		int result = crypto_aead_decrypt(decryptedBytes, out _, emptyByteArray, encryptedBytes.ToArray(), encryptedBytes.Length, associatedData.ToArray(), associatedData.Length, nonce.ToArray(), key.ToArray());
+
+		if (result != 0)
+		{
+			throw new Exception("Tag verification failed, either parameters are incorrect or data has been corrupted");
+		}
+
+		return decryptedBytes;
+	}
+
 	/// <summary>
 	/// Encrypt (lowest level method, imitates similar C based call)
 	/// </summary>

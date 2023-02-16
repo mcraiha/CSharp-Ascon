@@ -12,33 +12,37 @@ namespace tests
 
 		}
 
-		/*
+		
 		[Test]
-		public void DemoTest()
+		public void FancyApiTest()
 		{
-			byte[] n = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-			byte[] k = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-			byte[] a = {0x41, 0x53, 0x43, 0x4f, 0x4e}; // "ASCON"
-			byte[] m = {0x61, 0x73, 0x63, 0x6f, 0x6e}; // "ascon"
-			byte[] c = new byte[m.Length + Ascon128v12.CRYPTO_ABYTES];
-			byte[] s = {};
+			// Arrange
+			ReadOnlySpan<byte> messageOf16Bytes = "0123456789ABCDEF"u8;
+			ReadOnlySpan<byte> messageOfManyBytes = "This is a very long and boring text for testing purposes 😀 !"u8;
 
-			Ascon128v12.print("k", k, k.Length, 0);
-			Ascon128v12.print("n", n, n.Length, 0);
-			Ascon128v12.print("a", a, a.Length, 0);
-			Ascon128v12.print("m", m, m.Length, 0);
-			int clen = Ascon128v12.crypto_aead_encrypt(c, out int clen, m, m.Length, a, a.Length, s, n, k);
-			Ascon128v12.print("c", c, c.Length - Ascon128v12.CRYPTO_ABYTES, 0);
-			Ascon128v12.print("t", c, Ascon128v12.CRYPTO_ABYTES, c.Length - Ascon128v12.CRYPTO_ABYTES);
-			int mlen = Ascon128v12.crypto_aead_decrypt(m, m.Length, s, c, c.Length, a, a.Length, n, k);
-			Assert.AreNotEqual(-1, mlen, "verification failed");
-	
-			Ascon128v12.print("p", m, m.Length, 0);
-			
+			ReadOnlySpan<byte> emptyAssociatedData = new byte[0];
+			ReadOnlySpan<byte> longAssociatedData = "YET another crazy user id which is dragon"u8;
+
+			ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
+			ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8;
+
+			// Act
+			byte[] encrypted16BytesPlusTag = Ascon128v12.Encrypt(messageOf16Bytes, emptyAssociatedData, nonce, key);
+			byte[] messageOf16BytesDecrypted = Ascon128v12.Decrypt(encrypted16BytesPlusTag, emptyAssociatedData, nonce, key);
+
+			// Assert
+			Assert.AreEqual(16, messageOf16Bytes.Length);
+			Assert.IsFalse(messageOfManyBytes.Length % 16 == 0);
+
+			Assert.AreEqual(16, nonce.Length);
+			Assert.AreEqual(16, key.Length);
+
+			CollectionAssert.AreNotEqual(nonce.ToArray(), key.ToArray());
+
+			Assert.AreEqual(messageOf16Bytes.Length + 16, encrypted16BytesPlusTag.Length);
+			CollectionAssert.AreEqual(messageOf16Bytes.ToArray(), messageOf16BytesDecrypted);
 		}
-		*/
+		
 
 		
 		[Test]

@@ -10,7 +10,6 @@ namespace tests
 		public const int KAT_DATA_ERROR = -3;
 		public const int KAT_CRYPTO_FAILURE = -4;
 
-		public const int MAX_FILE_NAME = 256;
 		public const int MAX_MESSAGE_LENGTH = 32;
 		public const int MAX_ASSOCIATED_DATA_LENGTH = 32;
 

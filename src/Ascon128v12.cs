@@ -86,8 +86,8 @@ public static class Ascon128v12
 
 	private static void ascon_loadkey(ref ascon_key_t key, byte[] k) 
 	{
-		key.x[0] = LOAD(k, 0, 8);
-		key.x[1] = LOAD(k, 8, 8);
+		key.x[0] = LOAD8(k, 0);
+		key.x[1] = LOAD8(k, 8);
 	}
 
 	private static void ascon_initaead(ref ascon_state_t s, ascon_key_t key, byte[] npub) 
@@ -97,8 +97,8 @@ public static class Ascon128v12
 		s.x[1] = key.x[0];
 		s.x[2] = key.x[1];
 
-		s.x[3] = LOAD(npub, 0, 8);
-		s.x[4] = LOAD(npub, 8, 8);
+		s.x[3] = LOAD8(npub, 0);
+		s.x[4] = LOAD8(npub, 8);
 		printstate("init 1st key xor", s);
 		P(s, 12);
 
@@ -118,7 +118,7 @@ public static class Ascon128v12
 			int adOffset = 0;
 			while (adlen >= ASCON_AEAD_RATE) 
 			{
-				s.x[0] ^= LOAD(ad, adOffset, 8);
+				s.x[0] ^= LOAD8(ad, adOffset);
 				printstate("absorb adata", s);
 				P(s, nr);
 				adOffset += ASCON_AEAD_RATE;
@@ -145,8 +145,8 @@ public static class Ascon128v12
 
 		while (mlen >= ASCON_AEAD_RATE) 
 		{
-			s.x[0] ^= LOAD(m, mOffset, 8);
-			STORE(c, cOffset, s.x[0], 8);
+			s.x[0] ^= LOAD8(m, mOffset);
+			STORE8(c, cOffset, s.x[0]);
 
 			printstate("absorb plaintext", s);
 			P(s, nr);
@@ -175,9 +175,9 @@ public static class Ascon128v12
 
 		while (clen >= ASCON_AEAD_RATE) 
 		{
-			ulong cx = LOAD(c, cOffset, 8);
+			ulong cx = LOAD8(c, cOffset);
 			s.x[0] ^= cx;
-			STORE(m, mOffset, s.x[0], 8);
+			STORE8(m, mOffset, s.x[0]);
 			s.x[0] = cx;
 			
 			printstate("insert ciphertext", s);
@@ -318,19 +318,71 @@ public static class Ascon128v12
 		return ~0ul >> (64 - 8 * n);
 	}
 
+	/// <summary>
+	/// Specialized version of LOAD, where we always process 8 bytes at time
+	/// </summary>
+	/// <param name="bytes">Byte array</param>
+	/// <param name="offset">Offset</param>
+	private static ulong LOAD8(byte[] bytes, int offset)
+	{
+		return U64BIG(BitConverter.ToUInt64(bytes, offset));
+	}
+
 	private static ulong LOAD(byte[] bytes, int offset, int n) 
 	{
-		ulong x = BitConverter.ToUInt64(bytes, offset) & MASK(n);
-		return U64BIG(x);
+		if (n < 8)
+		{
+			Span<byte> tempArray = stackalloc byte[8];
+			for (int i = 0; i < n; i++)
+			{
+				tempArray[i] = bytes[offset + i];
+			}
+			
+			return U64BIG(BitConverter.ToUInt64(tempArray) & MASK(n));
+		}
+		else 
+		{
+			return U64BIG(BitConverter.ToUInt64(bytes, offset) & MASK(n));
+		}
+	}
+
+	/// <summary>
+	/// Specialized version of STORE, where we always process 8 bytes at time
+	/// </summary>
+	/// <param name="bytes"></param>
+	/// <param name="offset"></param>
+	/// <param name="w"></param>
+	private static void STORE8(byte[] bytes, int offset, ulong w)
+	{
+		ulong x = 0;
+		x |= U64BIG(w);
+		byte[] temp = BitConverter.GetBytes(x);
+		Buffer.BlockCopy(temp, 0, bytes, offset, 8);
 	}
 
 	private static void STORE(byte[] bytes, int offset, ulong w, int n) 
 	{
-		ulong x = BitConverter.ToUInt64(bytes, offset);
-		x &= ~MASK(n);
-		x |= U64BIG(w);
-		byte[] temp = BitConverter.GetBytes(x);
-		Buffer.BlockCopy(temp, 0, bytes, offset, 8);
+		if (n < 8)
+		{
+			Span<byte> tempArray = stackalloc byte[8];
+			for (int i = 0; i < n; i++)
+			{
+				tempArray[i] = bytes[offset + i];
+			}
+			ulong x = BitConverter.ToUInt64(tempArray);
+			x &= ~MASK(n);
+			x |= U64BIG(w);
+			byte[] temp = BitConverter.GetBytes(x);
+			Buffer.BlockCopy(temp, 0, bytes, offset, n);
+		}
+		else
+		{
+			ulong x = BitConverter.ToUInt64(bytes, offset);
+			x &= ~MASK(n);
+			x |= U64BIG(w);
+			byte[] temp = BitConverter.GetBytes(x);
+			Buffer.BlockCopy(temp, 0, bytes, offset, 8);
+		}
 	}
 
 	private static ulong LOADBYTES(byte[] bytes, int offset, int n) 

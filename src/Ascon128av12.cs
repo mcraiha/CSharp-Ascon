@@ -376,8 +376,20 @@ public static class Ascon128av12
 
 	private static ulong LOAD(byte[] bytes, int offset, int n) 
 	{
-		ulong x = BitConverter.ToUInt64(bytes, offset) & MASK(n);
-		return U64BIG(x);
+		if (n < 8)
+		{
+			Span<byte> tempArray = stackalloc byte[8];
+			for (int i = 0; i < n; i++)
+			{
+				tempArray[i] = bytes[offset + i];
+			}
+			
+			return U64BIG(BitConverter.ToUInt64(tempArray) & MASK(n));
+		}
+		else 
+		{
+			return U64BIG(BitConverter.ToUInt64(bytes, offset) & MASK(n));
+		}
 	}
 
 	/// <summary>
@@ -396,11 +408,27 @@ public static class Ascon128av12
 
 	private static void STORE(byte[] bytes, int offset, ulong w, int n) 
 	{
-		ulong x = BitConverter.ToUInt64(bytes, offset);
-		x &= ~MASK(n);
-		x |= U64BIG(w);
-		byte[] temp = BitConverter.GetBytes(x);
-		Buffer.BlockCopy(temp, 0, bytes, offset, 8);
+		if (n < 8)
+		{
+			Span<byte> tempArray = stackalloc byte[8];
+			for (int i = 0; i < n; i++)
+			{
+				tempArray[i] = bytes[offset + i];
+			}
+			ulong x = BitConverter.ToUInt64(tempArray);
+			x &= ~MASK(n);
+			x |= U64BIG(w);
+			byte[] temp = BitConverter.GetBytes(x);
+			Buffer.BlockCopy(temp, 0, bytes, offset, n);
+		}
+		else
+		{
+			ulong x = BitConverter.ToUInt64(bytes, offset);
+			x &= ~MASK(n);
+			x |= U64BIG(w);
+			byte[] temp = BitConverter.GetBytes(x);
+			Buffer.BlockCopy(temp, 0, bytes, offset, 8);
+		}
 	}
 
 	private static ulong LOADBYTES(byte[] bytes, int offset, int n) 

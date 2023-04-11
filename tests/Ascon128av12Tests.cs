@@ -13,6 +13,53 @@ namespace tests
 		}
 		
 		[Test]
+		public void FancyApiTest()
+		{
+			// Arrange
+			ReadOnlySpan<byte> messageOf16Bytes = "0123456789ABCDEF"u8;
+			ReadOnlySpan<byte> messageOfManyBytes = "This is a very long and boring text for testing purposes 😀 !"u8;
+
+			ReadOnlySpan<byte> emptyAssociatedData = new byte[0];
+			ReadOnlySpan<byte> longAssociatedData = "YET another crazy user id which is dragon"u8;
+
+			ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
+			ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8;
+
+			Span<byte> messageOf64Bytes = new byte[64];
+			messageOfManyBytes.CopyTo(messageOf64Bytes); // Create copy that is divisable by 8
+			byte[] messageOf64BytesEncrypted = new byte[79];
+
+			// Act
+			byte[] encrypted16BytesPlusTag = Ascon128av12.Encrypt(messageOf16Bytes, emptyAssociatedData, nonce, key);
+			byte[] messageOf16BytesDecrypted = Ascon128av12.Decrypt(encrypted16BytesPlusTag, emptyAssociatedData, nonce, key);
+
+			byte[] encryptedManyBytesPlusTag = Ascon128av12.Encrypt(messageOfManyBytes, longAssociatedData, nonce, key);
+			byte[] messageOfManyBytesDecrypted = Ascon128av12.Decrypt(encryptedManyBytesPlusTag, longAssociatedData, nonce, key);
+
+			int func_ret = Ascon128av12.crypto_aead_encrypt(messageOf64BytesEncrypted, out int clen, messageOf64Bytes.ToArray(), 63, longAssociatedData.ToArray(), longAssociatedData.Length, null, nonce.ToArray(), key.ToArray());
+
+			// Assert
+			Assert.AreEqual(16, messageOf16Bytes.Length);
+			Assert.IsFalse(messageOfManyBytes.Length % 16 == 0, "Lenght of message of many bytes should NOT be divisable by 16");
+			Assert.IsTrue(messageOf64Bytes.Length % 16 == 0, "Lenght of message of 64 bytes should be divisable by 16");
+
+			Assert.AreEqual(16, nonce.Length);
+			Assert.AreEqual(16, key.Length);
+
+			CollectionAssert.AreNotEqual(nonce.ToArray(), key.ToArray());
+
+			Assert.AreEqual(messageOf16Bytes.Length + 16, encrypted16BytesPlusTag.Length);
+			CollectionAssert.AreEqual(messageOf16Bytes.ToArray(), messageOf16BytesDecrypted);
+
+			Assert.AreEqual(messageOfManyBytes.Length + 16, encryptedManyBytesPlusTag.Length);
+			CollectionAssert.AreEqual(messageOfManyBytes.ToArray(), messageOfManyBytesDecrypted);
+
+			Assert.AreEqual(0, func_ret, $"crypto_aead_encrypt returned {func_ret}");
+			Assert.AreEqual(messageOf64BytesEncrypted.Length, clen);
+			CollectionAssert.AreEqual(encryptedManyBytesPlusTag, messageOf64BytesEncrypted);
+		}
+		
+		[Test]
 		public void GenKatTest()
 		{
 			// Arrange

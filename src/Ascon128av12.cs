@@ -157,10 +157,10 @@ public static class Ascon128av12
 		while (mlen >= ASCON_AEAD_RATE) 
 		{
 			s.x[0] ^= LOAD8(m, mOffset);
-			STORE(c, cOffset, s.x[0], 8);
+			STORE8(c, cOffset, s.x[0]);
 
 			s.x[1] ^= LOAD8(m, mOffset + 8);
-	  		STORE(c, cOffset + 8, s.x[1], 8);
+	  		STORE8(c, cOffset + 8, s.x[1]);
 
 			printstate("absorb plaintext", s);
 			P(s, nr);
@@ -176,7 +176,7 @@ public static class Ascon128av12
 		if (mlen >= 8) 
 		{
 			s.x[0] ^= LOAD8(m, mOffset);
-			STORE(c, cOffset, s.x[0], 8);
+			STORE8(c, cOffset, s.x[0]);
 			pxIndex = 1;
 			mOffset += 8;
 			cOffset += 8;
@@ -204,12 +204,12 @@ public static class Ascon128av12
 		{
 			ulong cx = LOAD8(c, cOffset);
 			s.x[0] ^= cx;
-			STORE(m, mOffset, s.x[0], 8);
+			STORE8(m, mOffset, s.x[0]);
 			s.x[0] = cx;
 
 			cx = LOAD8(c, cOffset + 8);
 			s.x[1] ^= cx;
-			STORE(m, mOffset + 8, s.x[1], 8);
+			STORE8(m, mOffset + 8, s.x[1]);
 			s.x[1] = cx;
 			
 			printstate("insert ciphertext", s);
@@ -226,7 +226,7 @@ public static class Ascon128av12
 		{
 			ulong cx = LOAD8(c, cOffset);
 			s.x[0] ^= cx;
-			STORE(m, mOffset, s.x[0], 8);
+			STORE8(m, mOffset, s.x[0]);
 			s.x[0] = cx;
 			pxIndex = 1;
 			mOffset += 8;
@@ -378,6 +378,20 @@ public static class Ascon128av12
 	{
 		ulong x = BitConverter.ToUInt64(bytes, offset) & MASK(n);
 		return U64BIG(x);
+	}
+
+	/// <summary>
+	/// Specialized version of STORE, where we always process 8 bytes at time
+	/// </summary>
+	/// <param name="bytes"></param>
+	/// <param name="offset"></param>
+	/// <param name="w"></param>
+	private static void STORE8(byte[] bytes, int offset, ulong w)
+	{
+		ulong x = 0;
+		x |= U64BIG(w);
+		byte[] temp = BitConverter.GetBytes(x);
+		Buffer.BlockCopy(temp, 0, bytes, offset, 8);
 	}
 
 	private static void STORE(byte[] bytes, int offset, ulong w, int n) 

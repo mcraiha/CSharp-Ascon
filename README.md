@@ -12,9 +12,38 @@ I needed a weekend project for myself
 
 ## How to use
 
-Currently the API is similar to C based one. I will create a simpler one in the future.
+Currently the basic API is similar to C based one. There is also a fancy API for easier operations.
 
 Both Ascon-128 (Ascon128v12.cs) and Ascon-128a (Ascon128av12.cs) are standalone files, so you can copy either one of them to your project and just use it. Nuget package will arrive later on.
+
+### C style API example
+
+```cs
+using CSAscon;
+
+// Message that will be encrypted 
+byte[] message = System.Text.Encoding.UTF8.GetBytes("This message should be encrypted");
+
+// Associated data
+byte[] associatedData = System.Text.Encoding.UTF8.GetBytes("Associated data");
+
+// Nonce (MUST be 16 bytes)
+byte[] nonce = new byte[] { 206, 74, 86, 166, 217, 45, 90, 73, 240, 65, 165, 45, 215, 47, 94, 73 };
+
+// Key (MUST be 16 bytes)
+byte[] key = new byte[] { 101, 101, 174, 222, 224, 97, 156, 94, 123, 183, 109, 219, 208, 135, 104, 122 };
+
+// Preallocate storage for encrypted data
+byte[] encryptedMessage = new byte[message.Length + 16];
+
+// Encrypt
+int func_ret = Ascon128v12.crypto_aead_encrypt(encryptedMessage, out int clen, message, message.Length, associatedData, associatedData.Length, null, nonce, key);
+
+// Decrypt
+byte[] decryptedMessage = new byte[message.Length];
+func_ret = Ascon128v12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, encryptedMessage, clen, associatedData, associatedData.Length, nonce, key);
+
+```
 
 ## Porting story
 

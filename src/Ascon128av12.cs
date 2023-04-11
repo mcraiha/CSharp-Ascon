@@ -86,8 +86,8 @@ public static class Ascon128av12
 
 	private static void ascon_loadkey(ref ascon_key_t key, byte[] k) 
 	{
-		key.x[0] = LOAD(k, 0, 8);
-		key.x[1] = LOAD(k, 8, 8);
+		key.x[0] = LOAD8(k, 0);
+		key.x[1] = LOAD8(k, 8);
 	}
 
 	private static void ascon_initaead(ref ascon_state_t s, ascon_key_t key, byte[] npub) 
@@ -97,8 +97,8 @@ public static class Ascon128av12
 		s.x[1] = key.x[0];
 		s.x[2] = key.x[1];
 
-		s.x[3] = LOAD(npub, 0, 8);
-		s.x[4] = LOAD(npub, 8, 8);
+		s.x[3] = LOAD8(npub, 0);
+		s.x[4] = LOAD8(npub, 8);
 		printstate("init 1st key xor", s);
 		P(s, 12);
 
@@ -118,8 +118,8 @@ public static class Ascon128av12
 			int adOffset = 0;
 			while (adlen >= ASCON_AEAD_RATE) 
 			{
-				s.x[0] ^= LOAD(ad, adOffset, 8);
-				s.x[1] ^= LOAD(ad, adOffset + 8, 8);
+				s.x[0] ^= LOAD8(ad, adOffset);
+				s.x[1] ^= LOAD8(ad, adOffset + 8);
 				printstate("absorb adata", s);
 				P(s, nr);
 				adOffset += ASCON_AEAD_RATE;
@@ -130,7 +130,7 @@ public static class Ascon128av12
 			int pxIndex = 0;
 			if (adlen >= 8) 
 			{
-				s.x[0] ^= LOAD(ad, adOffset, 8);
+				s.x[0] ^= LOAD8(ad, adOffset);
 				pxIndex = 1;
 				adOffset += 8;
 				adlen -= 8;
@@ -156,10 +156,10 @@ public static class Ascon128av12
 
 		while (mlen >= ASCON_AEAD_RATE) 
 		{
-			s.x[0] ^= LOAD(m, mOffset, 8);
+			s.x[0] ^= LOAD8(m, mOffset);
 			STORE(c, cOffset, s.x[0], 8);
 
-			s.x[1] ^= LOAD(m, mOffset + 8, 8);
+			s.x[1] ^= LOAD8(m, mOffset + 8);
 	  		STORE(c, cOffset + 8, s.x[1], 8);
 
 			printstate("absorb plaintext", s);
@@ -175,7 +175,7 @@ public static class Ascon128av12
 
 		if (mlen >= 8) 
 		{
-			s.x[0] ^= LOAD(m, mOffset, 8);
+			s.x[0] ^= LOAD8(m, mOffset);
 			STORE(c, cOffset, s.x[0], 8);
 			pxIndex = 1;
 			mOffset += 8;
@@ -202,12 +202,12 @@ public static class Ascon128av12
 
 		while (clen >= ASCON_AEAD_RATE) 
 		{
-			ulong cx = LOAD(c, cOffset, 8);
+			ulong cx = LOAD8(c, cOffset);
 			s.x[0] ^= cx;
 			STORE(m, mOffset, s.x[0], 8);
 			s.x[0] = cx;
 
-			cx = LOAD(c, cOffset + 8, 8);
+			cx = LOAD8(c, cOffset + 8);
 			s.x[1] ^= cx;
 			STORE(m, mOffset + 8, s.x[1], 8);
 			s.x[1] = cx;
@@ -224,7 +224,7 @@ public static class Ascon128av12
 		int pxIndex = 0;
 		if (clen >= 8)
 		{
-			ulong cx = LOAD(c, cOffset, 8);
+			ulong cx = LOAD8(c, cOffset);
 			s.x[0] ^= cx;
 			STORE(m, mOffset, s.x[0], 8);
 			s.x[0] = cx;
@@ -364,6 +364,16 @@ public static class Ascon128av12
 		return ~0ul >> (64 - 8 * n);
 	}
 
+	/// <summary>
+	/// Specialized version of LOAD, where we always process 8 bytes at time
+	/// </summary>
+	/// <param name="bytes">Byte array</param>
+	/// <param name="offset">Offset</param>
+	private static ulong LOAD8(byte[] bytes, int offset)
+	{
+		return U64BIG(BitConverter.ToUInt64(bytes, offset));
+	}
+
 	private static ulong LOAD(byte[] bytes, int offset, int n) 
 	{
 		ulong x = BitConverter.ToUInt64(bytes, offset) & MASK(n);
@@ -421,6 +431,117 @@ public static class Ascon128av12
 	private static ulong ROR(ulong x, int n) 
 	{
 		return BitOperations.RotateRight(x, n);
+	}
+
+	private static readonly byte[] emptyByteArray = new byte[0];
+
+	/// <summary>
+	/// Encrypt message (add associated data) with given nonce and key
+	/// </summary>
+	/// <param name="message">Message (1 - N bytes)</param>
+	/// <param name="associatedData">Associated data (0 - N bytes)</param>
+	/// <param name="nonce">Nonce (16 bytes)</param>
+	/// <param name="key">Key (16 bytes)</param>
+	/// <returns>Encrypted byte array (size is 16 bytes more than message's size)</returns>
+	public static byte[] Encrypt(ReadOnlySpan<byte> message, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
+	{
+		if (message == null)
+		{
+			throw new NullReferenceException("Message cannot be null");
+		}
+
+		if (associatedData == null)
+		{
+			throw new NullReferenceException("Associated data cannot be null");
+		}
+
+		if (nonce == null)
+		{
+			throw new NullReferenceException("Nonce cannot be null");
+		}
+
+		if (key == null)
+		{
+			throw new NullReferenceException("Key cannot be null");
+		}
+
+		if (message.Length < 1)
+		{
+			throw new ArgumentException("Message should have some bytes");
+		}
+
+		if (nonce.Length != CRYPTO_NPUBBYTES)
+		{
+			throw new ArgumentException($"Nonce must be {CRYPTO_NPUBBYTES} bytes");
+		}
+
+		if (key.Length != CRYPTO_KEYBYTES)
+		{
+			throw new ArgumentException($"Key must be {CRYPTO_KEYBYTES} bytes");
+		}
+
+		byte[] encryptedBytes = new byte[message.Length + CRYPTO_ABYTES];
+
+		crypto_aead_encrypt(encryptedBytes, out _, message.ToArray(), message.Length, associatedData.ToArray(), associatedData.Length, emptyByteArray, nonce.ToArray(), key.ToArray());
+
+		return encryptedBytes;
+	}
+
+	/// <summary>
+	/// Decrypt encoded message
+	/// </summary>
+	/// <param name="encryptedBytes">Encrypted bytes (16 - N bytes)</param>
+	/// <param name="associatedData">Associated data (0 - N bytes)</param>
+	/// <param name="nonce">Nonce (16 bytes)</param>
+	/// <param name="key">Key (16 bytes)</param>
+	/// <returns>Decrypted byte array (size is 16 bytes less than encrypted bytes's size)</returns>
+	public static byte[] Decrypt(ReadOnlySpan<byte> encryptedBytes, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
+	{
+		if (encryptedBytes == null)
+		{
+			throw new NullReferenceException("Encrypted bytes cannot be null");
+		}
+
+		if (associatedData == null)
+		{
+			throw new NullReferenceException("Associated data cannot be null");
+		}
+
+		if (nonce == null)
+		{
+			throw new NullReferenceException("Nonce cannot be null");
+		}
+
+		if (key == null)
+		{
+			throw new NullReferenceException("Key cannot be null");
+		}
+
+		if (encryptedBytes.Length < CRYPTO_ABYTES)
+		{
+			throw new ArgumentException($"Encrypted bytes should have at least {CRYPTO_ABYTES} bytes");
+		}
+
+		if (nonce.Length != CRYPTO_NPUBBYTES)
+		{
+			throw new ArgumentException($"Nonce must be {CRYPTO_NPUBBYTES} bytes");
+		}
+
+		if (key.Length != CRYPTO_KEYBYTES)
+		{
+			throw new ArgumentException($"Key must be {CRYPTO_KEYBYTES} bytes");
+		}
+
+		byte[] decryptedBytes = new byte[encryptedBytes.Length - CRYPTO_ABYTES];
+
+		int result = crypto_aead_decrypt(decryptedBytes, out _, emptyByteArray, encryptedBytes.ToArray(), encryptedBytes.Length, associatedData.ToArray(), associatedData.Length, nonce.ToArray(), key.ToArray());
+
+		if (result != 0)
+		{
+			throw new Exception("Tag verification failed, either parameters are incorrect or data has been corrupted");
+		}
+
+		return decryptedBytes;
 	}
 
 	/// <summary>

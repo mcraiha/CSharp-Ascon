@@ -60,8 +60,6 @@ namespace tests
 			CollectionAssert.AreEqual(encryptedManyBytesPlusTag, messageOf64BytesEncrypted);
 		}
 		
-
-		
 		[Test]
 		public void GenKatTest()
 		{

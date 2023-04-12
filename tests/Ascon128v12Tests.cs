@@ -13,7 +13,7 @@ namespace tests
 		}
 
 		
-		[Test]
+		[Test, Description("Test out fancy API")]
 		public void FancyApiTest()
 		{
 			// Arrange
@@ -60,7 +60,7 @@ namespace tests
 			CollectionAssert.AreEqual(encryptedManyBytesPlusTag, messageOf64BytesEncrypted);
 		}
 
-		[Test]
+		[Test, Description("Test non power of two message and associated data lengths")]
 		public void NonPowerOfTwoLegacyApiTest()
 		{
 			// Arrange
@@ -82,7 +82,7 @@ namespace tests
 			CollectionAssert.AreEqual(msg, msg2, "Message before encryption should match message after decryption");
 		}
 		
-		[Test]
+		[Test, Description("Test out GenKat inputs")]
 		public void GenKatTest()
 		{
 			// Arrange

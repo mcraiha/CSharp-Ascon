@@ -59,6 +59,28 @@ namespace tests
 			Assert.AreEqual(messageOf64BytesEncrypted.Length, clen);
 			CollectionAssert.AreEqual(encryptedManyBytesPlusTag, messageOf64BytesEncrypted);
 		}
+
+		[Test]
+		public void NonPowerOfTwoLegacyApiTest()
+		{
+			// Arrange
+			byte[] key = new byte[Ascon128v12.CRYPTO_KEYBYTES];
+  			byte[] nonce = new byte[Ascon128v12.CRYPTO_NPUBBYTES];
+
+			byte[] msg = new byte[23] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 };
+			byte[] msg2 = new byte[msg.Length];
+			byte[] ad = new byte[15] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+			byte[] ct = new byte[msg.Length + Ascon128v12.CRYPTO_ABYTES];
+
+			// Act
+			int func_ret = Ascon128v12.crypto_aead_encrypt(ct, out int clen, msg, msg.Length, ad, ad.Length, null, nonce, key);
+			func_ret = Ascon128v12.crypto_aead_decrypt(msg2, out int mlen2, null, ct, clen, ad, ad.Length, nonce, key);
+
+			// Assert
+			Assert.AreEqual(0, func_ret, $"crypto_aead_decrypt returned {func_ret}");
+			CollectionAssert.AreNotEqual(ct.Take(msg.Length), msg, "Encrypted message should not contain plaintext message");
+			CollectionAssert.AreEqual(msg, msg2, "Message before encryption should match message after decryption");
+		}
 		
 		[Test]
 		public void GenKatTest()

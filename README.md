@@ -16,6 +16,8 @@ Currently the basic API is similar to C based one. There is also a fancy API for
 
 Both Ascon-128 (Ascon128v12.cs) and Ascon-128a (Ascon128av12.cs) are standalone files, so you can copy either one of them to your project and just use it. Nuget package will arrive later on.
 
+❗ Do **NOT** reuse same key + nonce combination. Always change at least the nonce when you create a new encrypted message ❗
+
 ### C style API example
 
 With Ascon-128 you can do the following

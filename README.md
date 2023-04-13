@@ -17,7 +17,9 @@ Currently the basic API is similar to C based one. There is also a fancy API for
 Both Ascon-128 (Ascon128v12.cs) and Ascon-128a (Ascon128av12.cs) are standalone files, so you can copy either one of them to your project and just use it. Nuget package will arrive later on.
 
 ### C style API example
+
 With Ascon-128 you can do the following
+
 ```cs
 using CSAscon;
 
@@ -45,6 +47,7 @@ func_ret = Ascon128v12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, en
 ```
 
 with Ascon-128a you can do the following
+
 ```cs
 using CSAscon;
 
@@ -69,6 +72,44 @@ int func_ret = Ascon128av12.crypto_aead_encrypt(encryptedMessage, out int clen, 
 // Decrypt
 byte[] decryptedMessage = new byte[message.Length];
 func_ret = Ascon128av12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, encryptedMessage, clen, associatedData, associatedData.Length, nonce, key);
+```
+
+### Fancy API
+
+With Ascon-128 you can do the following
+
+```cs
+using CSAscon;
+
+ReadOnlySpan<byte> message = "This is a very long and boring text for testing purposes 😀 !"u8;
+ReadOnlySpan<byte> associatedData = "My associated data"u8;
+
+ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
+ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8; // Use better key in real life
+
+// Encrypt
+byte[] encryptedMessage = Ascon128v12.Encrypt(message, associatedData, nonce, key);
+
+// Decrypt
+byte[] decryptedMessage = Ascon128v12.Decrypt(encryptedMessage, associatedData, nonce, key);
+```
+
+With Ascon-128a you can do the following
+
+```cs
+using CSAscon;
+
+ReadOnlySpan<byte> message = "This is a very long and boring text for testing purposes 😀 !"u8;
+ReadOnlySpan<byte> associatedData = "My associated data"u8;
+
+ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
+ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8; // Use better key in real life
+
+// Encrypt
+byte[] encryptedMessage = Ascon128av12.Encrypt(message, associatedData, nonce, key);
+
+// Decrypt
+byte[] decryptedMessage = Ascon128av12.Decrypt(encryptedMessage, associatedData, nonce, key);
 ```
 
 ## Porting story

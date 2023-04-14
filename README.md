@@ -82,7 +82,7 @@ func_ret = Ascon128av12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, e
 
 ### Fancy API
 
-With Ascon-128 you can do the following
+With Ascon-128 you can do the following, test it out in [.NET Fiddle](https://dotnetfiddle.net/AAkKSV)
 
 ```cs
 using CSAscon;

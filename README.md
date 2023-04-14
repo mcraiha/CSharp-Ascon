@@ -6,6 +6,10 @@ Managed C# (CSharp) implementation of [Ascon](https://ascon.iaik.tugraz.at/index
 
 [![.NET](https://github.com/mcraiha/CSharp-Ascon/actions/workflows/dotnet.yml/badge.svg)](https://github.com/mcraiha/CSharp-Ascon/actions/workflows/dotnet.yml)
 
+## Nuget
+
+[LibAscon128](https://www.nuget.org/packages/LibAscon128)
+
 ## Why
 
 I needed a weekend project for myself

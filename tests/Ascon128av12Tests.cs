@@ -138,5 +138,35 @@ namespace tests
 			//Console.WriteLine(sw.ToString());
 			Assert.AreEqual(sw.ToString(), File.ReadAllText("LWC_AEAD_KAT_128_128_a.txt"));
 		}
+
+		[Test, Description("Test out incorrect encryption parameters")]
+		public void IncorrectEncryptParametersTest()
+		{
+			// Arrange
+			byte[] messageValid = "0123456789ABCDEFAABBBCC"u8.ToArray();
+			byte[] associatedDataValid = "Valid associated data"u8.ToArray();
+			byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
+			byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
+
+			// Act
+			var nullMessageException1 = Assert.Throws<NullReferenceException>(() => Ascon128av12.Encrypt(null, associatedDataValid, nonceValid, keyValid) );
+			var nullMessageException2 = Assert.Throws<NullReferenceException>(() => Ascon128av12.Encrypt(messageValid, null, nonceValid, keyValid) );
+			var nullMessageException3 = Assert.Throws<NullReferenceException>(() => Ascon128av12.Encrypt(messageValid, associatedDataValid, null, keyValid) );
+			var nullMessageException4 = Assert.Throws<NullReferenceException>(() => Ascon128av12.Encrypt(messageValid, associatedDataValid, nonceValid, null) );
+
+			var argumentException1 = Assert.Throws<ArgumentException>(() => Ascon128av12.Encrypt(new byte[0], associatedDataValid, nonceValid, keyValid) );
+			var argumentException2 = Assert.Throws<ArgumentException>(() => Ascon128av12.Encrypt(messageValid, associatedDataValid, new byte[0], keyValid) );
+			var argumentException3 = Assert.Throws<ArgumentException>(() => Ascon128av12.Encrypt(messageValid, associatedDataValid, nonceValid, new byte[0]) );
+
+			// Assert
+			Assert.AreEqual("Message cannot be null", nullMessageException1!.Message);
+			Assert.AreEqual("Associated data cannot be null", nullMessageException2!.Message);
+			Assert.AreEqual("Nonce cannot be null", nullMessageException3!.Message);
+			Assert.AreEqual("Key cannot be null", nullMessageException4!.Message);
+
+			Assert.AreEqual("Message should have some bytes", argumentException1!.Message);
+			Assert.AreEqual("Nonce must be 16 bytes", argumentException2!.Message);
+			Assert.AreEqual("Key must be 16 bytes", argumentException3!.Message);
+		}
 	}
 }

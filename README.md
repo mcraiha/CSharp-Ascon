@@ -126,6 +126,36 @@ Code is ported from [opt64](https://github.com/ascon/ascon-c/tree/main/crypto_ae
 
 Only [little-endian](https://en.wikipedia.org/wiki/Endianness) (LE) systems (x86, x64, ARM etc.) are supported, because there aren't that many big-endian .NET environments.
 
+## Benchmarks
+
+You can run benchmarks by moving to **benchmarks** folder and running following command
+```bash
+dotnet run -c Release
+```
+
+there are four different input sizes (64 bytes, 1024 bytes, 65536 bytes and 1 MiB) and comparisons are done between Ascon-128 and Ascon-128a
+
+Below is one run of the benchmark  
+```
+BenchmarkDotNet=v0.13.5, OS=Windows 10 (10.0.19045.2846/22H2/2022Update)
+Intel Core i5-9600K CPU 3.70GHz (Coffee Lake), 1 CPU, 6 logical and 6 physical cores
+.NET SDK=7.0.100
+  [Host]     : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+```
+
+
+|                         Method |          Mean |      Error |     StdDev |       Gen0 |   Allocated |
+|------------------------------- |--------------:|-----------:|-----------:|-----------:|------------:|
+|       Encrypt_64bytes_Ascon128 |      1.295 us |  0.0021 us |  0.0019 us |     1.2321 |     5.66 KB |
+|      Encrypt_64bytes_Ascon128a |      1.035 us |  0.0141 us |  0.0132 us |     0.9594 |     4.41 KB |
+|     Encrypt_1024bytes_Ascon128 |     12.286 us |  0.0244 us |  0.0216 us |    11.8408 |    54.41 KB |
+|    Encrypt_1024bytes_Ascon128a |      8.933 us |  0.0062 us |  0.0052 us |     8.3008 |    38.16 KB |
+|    Encrypt_65536bytes_Ascon128 |    800.680 us |  8.5808 us |  7.6067 us |   724.6094 |  3330.42 KB |
+|   Encrypt_65536bytes_Ascon128a |    544.412 us |  0.7619 us |  0.6754 us |   500.9766 |  2306.17 KB |
+|  Encrypt_1048576bytes_Ascon128 | 12,212.051 us | 45.5852 us | 35.5899 us | 11578.1250 | 53250.42 KB |
+| Encrypt_1048576bytes_Ascon128a |  8,784.650 us | 14.5065 us | 12.8596 us |  8015.6250 | 36866.17 KB |
+
 ## License
 
 [CC0 1.0 Universal](LICENSE) because original C implementation uses that license

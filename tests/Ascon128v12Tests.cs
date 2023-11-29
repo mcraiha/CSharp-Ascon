@@ -1,3 +1,7 @@
+#pragma warning disable NUnit2005
+#pragma warning disable NUnit2006
+#pragma warning disable NUnit2049
+
 using NUnit.Framework;
 using CSAscon;
 using System.IO;

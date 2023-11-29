@@ -599,7 +599,7 @@ public static class Ascon128av12
 	/// <param name="npub">Nonce as bytes (must 16 bytes / 128 bits)</param>
 	/// <param name="k">Key as bytes (must 16 bytes / 128 bits)</param>
 	/// <returns>0 if everything went correctly with encryption</returns>
-	public static int crypto_aead_encrypt(byte[] c, out int clen, byte[] m, int mlen, byte[] ad, int adlen, byte[] nsec, byte[] npub, byte[] k) 
+	public static int crypto_aead_encrypt(byte[] c, out int clen, byte[] m, int mlen, byte[] ad, int adlen, byte[]? nsec, byte[] npub, byte[] k) 
 	{
 		ascon_state_t s = new ascon_state_t();
 		clen = mlen + CRYPTO_ABYTES;
@@ -629,7 +629,7 @@ public static class Ascon128av12
 	/// <param name="npub">Nonce as bytes (must 16 bytes / 128 bits)</param>
 	/// <param name="k">Key as bytes (must 16 bytes / 128 bits)</param>
 	/// <returns>0 if everything went correctly with decryption</returns>
-	public static int crypto_aead_decrypt(byte[] m, out int mlen, byte[] nsec, byte[] c, int clen, byte[] ad, int adlen, byte[] npub, byte[] k) 
+	public static int crypto_aead_decrypt(byte[] m, out int mlen, byte[]? nsec, byte[] c, int clen, byte[] ad, int adlen, byte[] npub, byte[] k) 
 	{
 		ascon_state_t s = new ascon_state_t();
 		if (clen < CRYPTO_ABYTES)

@@ -137,24 +137,23 @@ there are four different input sizes (64 bytes, 1024 bytes, 65536 bytes and 1 Mi
 
 Below is one run of the benchmark  
 ```
-BenchmarkDotNet=v0.13.5, OS=Windows 10 (10.0.19045.2846/22H2/2022Update)
-Intel Core i5-9600K CPU 3.70GHz (Coffee Lake), 1 CPU, 6 logical and 6 physical cores
-.NET SDK=7.0.100
-  [Host]     : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
-  DefaultJob : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
+AMD Ryzen 5 7600, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 8.0.100
+  [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
 ```
 
-
-|                         Method |          Mean |      Error |     StdDev |       Gen0 |   Allocated |
-|------------------------------- |--------------:|-----------:|-----------:|-----------:|------------:|
-|       Encrypt_64bytes_Ascon128 |      1.295 us |  0.0021 us |  0.0019 us |     1.2321 |     5.66 KB |
-|      Encrypt_64bytes_Ascon128a |      1.035 us |  0.0141 us |  0.0132 us |     0.9594 |     4.41 KB |
-|     Encrypt_1024bytes_Ascon128 |     12.286 us |  0.0244 us |  0.0216 us |    11.8408 |    54.41 KB |
-|    Encrypt_1024bytes_Ascon128a |      8.933 us |  0.0062 us |  0.0052 us |     8.3008 |    38.16 KB |
-|    Encrypt_65536bytes_Ascon128 |    800.680 us |  8.5808 us |  7.6067 us |   724.6094 |  3330.42 KB |
-|   Encrypt_65536bytes_Ascon128a |    544.412 us |  0.7619 us |  0.6754 us |   500.9766 |  2306.17 KB |
-|  Encrypt_1048576bytes_Ascon128 | 12,212.051 us | 45.5852 us | 35.5899 us | 11578.1250 | 53250.42 KB |
-| Encrypt_1048576bytes_Ascon128a |  8,784.650 us | 14.5065 us | 12.8596 us |  8015.6250 | 36866.17 KB |
+| Method                         | Mean           | Error        | StdDev       | Gen0      | Allocated   |
+|------------------------------- |---------------:|-------------:|-------------:|----------:|------------:|
+| Encrypt_64bytes_Ascon128       |     1,025.6 ns |      9.76 ns |      7.62 ns |    0.3452 |     5.66 KB |
+| Encrypt_64bytes_Ascon128a      |       809.6 ns |      3.04 ns |      2.38 ns |    0.2699 |     4.41 KB |
+| Encrypt_1024bytes_Ascon128     |     9,500.1 ns |     22.50 ns |     18.79 ns |    3.3264 |    54.41 KB |
+| Encrypt_1024bytes_Ascon128a    |     6,934.8 ns |     41.65 ns |     36.92 ns |    2.3346 |    38.16 KB |
+| Encrypt_65536bytes_Ascon128    |   589,978.5 ns |  6,926.59 ns |  6,140.25 ns |  203.1250 |  3330.41 KB |
+| Encrypt_65536bytes_Ascon128a   |   414,536.1 ns |    698.43 ns |    545.29 ns |  141.1133 |  2306.16 KB |
+| Encrypt_1048576bytes_Ascon128  | 9,306,042.2 ns | 59,106.82 ns | 49,356.87 ns | 3250.0000 | 53250.42 KB |
+| Encrypt_1048576bytes_Ascon128a | 6,665,449.5 ns | 10,829.38 ns |  9,043.03 ns | 2250.0000 | 36866.17 KB |
 
 ## License
 

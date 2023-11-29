@@ -550,8 +550,8 @@ public static class Ascon128v12
 	/// <param name="ad">Associated data bytes (see https://en.wikipedia.org/wiki/Authenticated_encryption#Authenticated_encryption_with_associated_data_(AEAD) )</param>
 	/// <param name="adlen">How many bytes will be uses from Associated data bytes</param>
 	/// <param name="nsec">NOT USED (only for API compatibility)</param>
-	/// <param name="npub">Nonce as bytes (must 16 bytes / 128 bits)</param>
-	/// <param name="k">Key as bytes (must 16 bytes / 128 bits)</param>
+	/// <param name="npub">Nonce as bytes (must be 16 bytes / 128 bits)</param>
+	/// <param name="k">Key as bytes (must be 16 bytes / 128 bits)</param>
 	/// <returns>0 if everything went correctly with encryption</returns>
 	public static int crypto_aead_encrypt(byte[] c, out int clen, byte[] m, int mlen, byte[] ad, int adlen, byte[]? nsec, byte[] npub, byte[] k) 
 	{
@@ -580,8 +580,8 @@ public static class Ascon128v12
 	/// <param name="clen">How many bytes from encrypted array should be procesessed</param>
 	/// <param name="ad">Associated data bytes (see https://en.wikipedia.org/wiki/Authenticated_encryption#Authenticated_encryption_with_associated_data_(AEAD) )</param>
 	/// <param name="adlen">How many bytes will be uses from Associated data bytes</param>
-	/// <param name="npub">Nonce as bytes (must 16 bytes / 128 bits)</param>
-	/// <param name="k">Key as bytes (must 16 bytes / 128 bits)</param>
+	/// <param name="npub">Nonce as bytes (must be 16 bytes / 128 bits)</param>
+	/// <param name="k">Key as bytes (must be 16 bytes / 128 bits)</param>
 	/// <returns>0 if everything went correctly with decryption</returns>
 	public static int crypto_aead_decrypt(byte[] m, out int mlen, byte[]? nsec, byte[] c, int clen, byte[] ad, int adlen, byte[] npub, byte[] k) 
 	{

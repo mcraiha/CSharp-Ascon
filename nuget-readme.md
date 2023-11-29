@@ -66,7 +66,7 @@ byte[] decryptedMessage = new byte[message.Length];
 func_ret = Ascon128av12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, encryptedMessage, clen, associatedData, associatedData.Length, nonce, key);
 ```
 
-### Fancy API
+### Fancy API example
 
 With Ascon-128 you can do the following
 

@@ -441,26 +441,6 @@ public static class Ascon128v12
 	/// <returns>Encrypted byte array (size is 16 bytes more than message's size)</returns>
 	public static byte[] Encrypt(ReadOnlySpan<byte> message, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
 	{
-		if (message == null)
-		{
-			throw new NullReferenceException("Message cannot be null");
-		}
-
-		if (associatedData == null)
-		{
-			throw new NullReferenceException("Associated data cannot be null");
-		}
-
-		if (nonce == null)
-		{
-			throw new NullReferenceException("Nonce cannot be null");
-		}
-
-		if (key == null)
-		{
-			throw new NullReferenceException("Key cannot be null");
-		}
-
 		if (message.Length < 1)
 		{
 			throw new ArgumentException("Message should have some bytes");
@@ -493,26 +473,6 @@ public static class Ascon128v12
 	/// <returns>Decrypted byte array (size is 16 bytes less than encrypted bytes's size)</returns>
 	public static byte[] Decrypt(ReadOnlySpan<byte> encryptedBytes, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
 	{
-		if (encryptedBytes == null)
-		{
-			throw new NullReferenceException("Encrypted bytes cannot be null");
-		}
-
-		if (associatedData == null)
-		{
-			throw new NullReferenceException("Associated data cannot be null");
-		}
-
-		if (nonce == null)
-		{
-			throw new NullReferenceException("Nonce cannot be null");
-		}
-
-		if (key == null)
-		{
-			throw new NullReferenceException("Key cannot be null");
-		}
-
 		if (encryptedBytes.Length < CRYPTO_ABYTES)
 		{
 			throw new ArgumentException($"Encrypted bytes should have at least {CRYPTO_ABYTES} bytes");

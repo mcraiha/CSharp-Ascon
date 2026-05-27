@@ -71,7 +71,7 @@ public static class Asconhash256
 		s.x[4] = 0x1a5c464906c5976d;
 	}
 
-	private static void ascon_absorb(ref ascon_state_t s, ReadOnlyMemory<byte> input, ulong inlen)
+	private static void ascon_absorb(ref ascon_state_t s, ReadOnlyMemory<byte> input, int inlen)
 	{
 		/* absorb full plaintext blocks */
 		int offset = 0;
@@ -84,11 +84,11 @@ public static class Asconhash256
 		}
 
 		/* absorb final plaintext block */
-		s.x[0] ^= LOAD(input.Slice(offset), (int)inlen);
-		s.x[0] ^= PAD((int)inlen);
+		s.x[0] ^= LOAD(input.Slice(offset), inlen);
+		s.x[0] ^= PAD(inlen);
 	}
 
-	private static void ascon_squeeze(ref ascon_state_t s, Memory<byte> output, ulong outlen)
+	private static void ascon_squeeze(ref ascon_state_t s, Memory<byte> output, int outlen)
 	{
 		/* squeeze full output blocks */
 		P(s, 12);
@@ -101,10 +101,10 @@ public static class Asconhash256
 			outlen -= ASCON_HASH_RATE;
 		}
 		/* squeeze final output block */
-		STOREBYTES(output.Slice(offset), s.x[0], (int)outlen);
+		STOREBYTES(output.Slice(offset), s.x[0], outlen);
 	}
 
-	private static int ascon_xof(Memory<byte> output, ulong outlen, ReadOnlyMemory<byte> input, ulong inlen) 
+	private static int ascon_xof(Memory<byte> output, int outlen, ReadOnlyMemory<byte> input, int inlen) 
 	{
 		ascon_state_t s = new ascon_state_t();
 
@@ -115,9 +115,16 @@ public static class Asconhash256
 		return 0;
 	}
 
-	public static int crypto_hash(Memory<byte> output, ReadOnlyMemory<byte> input, ulong inlen)
+	/// <summary>
+	/// Get Asconhash256 for given input
+	/// </summary>
+	/// <param name="output">Memory output (must be at least 32 bytes!)</param>
+	/// <param name="input">ReadOnlyMemory of input bytes</param>
+	/// <returns>0 on success</returns>
+	/// <remarks>Lowest level, use only if you know what you are doing</remarks>
+	public static int crypto_hash(Memory<byte> output, ReadOnlyMemory<byte> input)
 	{
-		return ascon_xof(output, CRYPTO_BYTES, input, inlen);
+		return ascon_xof(output, CRYPTO_BYTES, input, input.Length);
 	}
 
 	private static void P(ascon_state_t s, int nr) 

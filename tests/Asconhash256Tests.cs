@@ -29,7 +29,7 @@ public class Asconhash256Tests
 		// Assert
 		foreach ((byte[] expected, byte[] input) in expectedAndInput)
 		{
-			int returnValue = Asconhash256.crypto_hash(tempBytes, input, (ulong)input.Length);
+			int returnValue = Asconhash256.crypto_hash(tempBytes, input);
 			Assert.That(returnValue, Is.EqualTo(0));
 			Assert.That(tempBytes, Is.EqualTo(expected));
 		}
@@ -54,7 +54,7 @@ public class Asconhash256Tests
 		{
 			byte[] inputArray = input.ToArray();
 
-			Asconhash256.crypto_hash(tempBytes, inputArray, (ulong)inputArray.Length);
+			Asconhash256.crypto_hash(tempBytes, inputArray);
 			sw.Write($"Count = {count}\n");
 			sw.Write($"Msg = {Convert.ToHexString(inputArray)}\n");
 			sw.Write($"MD = {Convert.ToHexString(tempBytes)}\n");

@@ -118,6 +118,20 @@ public static class Asconhash256
 	/// <summary>
 	/// Get Asconhash256 for given input
 	/// </summary>
+	/// <param name="input">ReadOnlyMemory of input bytes</param>
+	/// <returns>Returns byte[] that contains the 32 bytes of hash</returns>
+	public static byte[] HashBytes(ReadOnlyMemory<byte> input)
+	{
+		byte[] returnValue = new byte[CRYPTO_BYTES];
+
+		crypto_hash(returnValue, input);
+
+		return returnValue;
+	}
+
+	/// <summary>
+	/// Get Asconhash256 for given input
+	/// </summary>
 	/// <param name="output">Memory output (must be at least 32 bytes!)</param>
 	/// <param name="input">ReadOnlyMemory of input bytes</param>
 	/// <returns>0 on success</returns>

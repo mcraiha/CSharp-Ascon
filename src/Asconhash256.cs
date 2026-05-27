@@ -11,13 +11,28 @@ public static class Asconhash256
 	/// <summary>
 	/// Version number of Ascon
 	/// </summary>
+	/// <remarks>Only informational number, not used in library code</remarks>
 	public const string CRYPTO_VERSION = "1.3.0";
 	
+	/// <summary>
+	/// How many bytes of hash will be produced
+	/// </summary>
 	public const int CRYPTO_BYTES = 32; // 256 bits
-	public const int ASCON_HASH_BYTES = 32; /* HASH */
+
+	/// <summary>
+	/// How many rounds of the ASCON permutation are applied after each loop
+	/// </summary>
 	public const int ASCON_HASH_ROUNDS = 12;
+
+	/// <summary>
+	/// Variant number
+	/// </summary>
+	/// <remarks>Only informational number, not used in library code</remarks>
 	public const int ASCON_VARIANT = 2;
 
+	/// <summary>
+	/// How many bytes are processed per loop if available
+	/// </summary>
 	public const int ASCON_HASH_RATE = 8;
 
 	private const byte RC0 = 0xf0;

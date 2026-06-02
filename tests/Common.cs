@@ -20,9 +20,9 @@ namespace tests
 			sw.Write("\n");
 		}
 
-		public static void init_buffer(byte[] buffer, int numbytes) 
+		public static void init_buffer(byte[] buffer, int numbytes, byte add) 
 		{
-			for (int i = 0; i < numbytes; i++) buffer[i] = (byte)i;
+			for (int i = 0; i < numbytes; i++) buffer[i] = (byte)(i + add);
 		}
 	}
 }

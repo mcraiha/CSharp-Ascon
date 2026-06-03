@@ -13,7 +13,7 @@ public class Asconaead128Tests
 
 	}
 	
-	//[Test, Description("Test out fancy API")]
+	[Test, Description("Test out fancy API")]
 	public void FancyApiTest()
 	{
 		// Arrange
@@ -47,17 +47,17 @@ public class Asconaead128Tests
 		Assert.That(nonce.Length, Is.EqualTo(16));
 		Assert.That(key.Length, Is.EqualTo(16));
 
-		CollectionAssert.AreNotEqual(nonce.ToArray(), key.ToArray());
+		Assert.That(nonce.ToArray(), Is.Not.EqualTo(key.ToArray()));
 
-		Assert.AreEqual(messageOf16Bytes.Length + 16, encrypted16BytesPlusTag.Length);
-		CollectionAssert.AreEqual(messageOf16Bytes.ToArray(), messageOf16BytesDecrypted);
+		Assert.That(messageOf16Bytes.Length + 16, Is.EqualTo(encrypted16BytesPlusTag.Length));
+		Assert.That(messageOf16BytesDecrypted, Is.EqualTo(messageOf16Bytes.ToArray()));
 
-		Assert.AreEqual(messageOfManyBytes.Length + 16, encryptedManyBytesPlusTag.Length);
-		CollectionAssert.AreEqual(messageOfManyBytes.ToArray(), messageOfManyBytesDecrypted);
+		Assert.That(messageOfManyBytes.Length + 16, Is.EqualTo(encryptedManyBytesPlusTag.Length));
+		Assert.That(messageOfManyBytes.ToArray(), Is.EqualTo(messageOfManyBytesDecrypted));
 
-		Assert.AreEqual(0, func_ret, $"crypto_aead_encrypt returned {func_ret}");
-		Assert.AreEqual(messageOf64BytesEncrypted.Length, clen);
-		CollectionAssert.AreEqual(encryptedManyBytesPlusTag, messageOf64BytesEncrypted);
+		Assert.That(func_ret, Is.EqualTo(0), $"crypto_aead_encrypt returned {func_ret}");
+		Assert.That(messageOf64BytesEncrypted.Length, Is.EqualTo(clen));
+		Assert.That(encryptedManyBytesPlusTag, Is.EqualTo(messageOf64BytesEncrypted));
 	}
 
 	[Test, Description("Test non power of two message and associated data lengths")]

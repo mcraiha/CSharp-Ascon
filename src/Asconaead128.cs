@@ -21,7 +21,6 @@ public static class Asconaead128
 	/// How many bytes key must have
 	/// </summary>
 	public const int CRYPTO_KEYBYTES = 16;
-	private const int CRYPTO_NSECBYTES = 0;
 
 	/// <summary>
 	/// How many bytes nonce must have
@@ -32,7 +31,6 @@ public static class Asconaead128
 	/// How many bytes tag has
 	/// </summary>
 	public const int CRYPTO_ABYTES = 16;
-	private const int CRYPTO_NOOVERLAP = 1;
 
 	/// <summary>
 	/// Initialization vector (IV) 
@@ -48,6 +46,12 @@ public static class Asconaead128
 	/// How many values the key has
 	/// </summary>
 	private const int ASCON_KEYWORDS = (CRYPTO_KEYBYTES + 7) / 8;
+
+	/// <summary>
+	/// Variant number
+	/// </summary>
+	/// <remarks>Only informational number, not used in library code</remarks>
+	public const int ASCON_VARIANT = 1;
 
 	private const byte RC0 = 0xf0;
 	private const byte RC1 = 0xe1;

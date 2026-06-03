@@ -119,30 +119,30 @@ public class Asconaead128Tests
 				Common.WriteToString(sw, "AD = ", ad, adlen);
 
 				func_ret = Asconaead128.crypto_aead_encrypt(ct, out int clen, msg, mlen, ad, adlen, null, nonce, key);
-				Assert.AreEqual(0, func_ret, $"crypto_aead_encrypt returned {func_ret}");
+				Assert.That(func_ret, Is.EqualTo(0), $"crypto_aead_encrypt returned {func_ret}");
 
 				Common.WriteToString(sw, "CT = ", ct, clen);
 				sw.Write("\n");
 
 				func_ret = Asconaead128.crypto_aead_decrypt(msg2, out int mlen2, null, ct, clen, ad, adlen, nonce, key);
-				Assert.AreEqual(0, func_ret, $"crypto_aead_decrypt returned {func_ret}");
+				Assert.That(func_ret, Is.EqualTo(0), $"crypto_aead_decrypt returned {func_ret}");
 
-				Assert.AreEqual(mlen, mlen2, "$crypto_aead_decrypt returned bad 'mlen': Got <{mlen2}>, expected <{mlen}>");
+				Assert.That(mlen2, Is.EqualTo(mlen), "$crypto_aead_decrypt returned bad 'mlen': Got <{mlen2}>, expected <{mlen}>");
 
-				CollectionAssert.AreEqual(msg.Take(mlen), msg2.Take(mlen2), "crypto_aead_decrypt did not recover the plaintext");
+				Assert.That(msg2.Take(mlen2), Is.EqualTo(msg.Take(mlen)), "crypto_aead_decrypt did not recover the plaintext");
 
 				// test failed verification
 				ct[0] ^= 1;
 				func_ret = Asconaead128.crypto_aead_decrypt(msg2, out mlen2, null, ct, clen, ad, adlen, nonce, key);
-				//return;
-				Assert.AreNotEqual(0, func_ret, "crypto_aead_decrypt should have failed");
+
+				Assert.That(func_ret, Is.Not.EqualTo(0), "crypto_aead_decrypt should have failed");
 			}
 		}
 		//Console.WriteLine(sw.ToString());
-		Assert.AreEqual(expectedKat, sw.ToString());
+		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
 	}
 
-	//[Test, Description("Test out incorrect encryption parameters")]
+	[Test, Description("Test out incorrect encryption parameters")]
 	public void IncorrectEncryptParametersTest()
 	{
 		// Arrange
@@ -157,12 +157,12 @@ public class Asconaead128Tests
 		var argumentException3 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(messageValid, associatedDataValid, nonceValid, new byte[0]) );
 
 		// Assert
-		Assert.AreEqual("Message should have some bytes", argumentException1!.Message);
-		Assert.AreEqual("Nonce must be 16 bytes", argumentException2!.Message);
-		Assert.AreEqual("Key must be 16 bytes", argumentException3!.Message);
+		Assert.That(argumentException1!.Message, Is.EqualTo("Message should have some bytes"));
+		Assert.That(argumentException2!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException3!.Message, Is.EqualTo("Key must be 16 bytes"));
 	}
 
-	//[Test, Description("Test out incorrect decryption parameters")]
+	[Test, Description("Test out incorrect decryption parameters")]
 	public void IncorrectDecryptParametersTest()
 	{
 		// Arrange
@@ -177,8 +177,8 @@ public class Asconaead128Tests
 		var argumentException3 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(encryptedMessageValid, associatedDataValid, nonceValid, new byte[0]) );
 
 		// Assert
-		Assert.AreEqual("Encrypted bytes should have at least 16 bytes", argumentException1!.Message);
-		Assert.AreEqual("Nonce must be 16 bytes", argumentException2!.Message);
-		Assert.AreEqual("Key must be 16 bytes", argumentException3!.Message);
+		Assert.That(argumentException1!.Message, Is.EqualTo("Encrypted bytes should have at least 16 bytes"));
+		Assert.That(argumentException2!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException3!.Message, Is.EqualTo("Key must be 16 bytes"));
 	}
 }

@@ -40,12 +40,12 @@ public class Asconaead128Tests
 		int func_ret = Asconaead128.crypto_aead_encrypt(messageOf64BytesEncrypted, out int clen, messageOf64Bytes.ToArray(), 63, longAssociatedData.ToArray(), longAssociatedData.Length, null, nonce.ToArray(), key.ToArray());
 
 		// Assert
-		Assert.AreEqual(16, messageOf16Bytes.Length);
+		Assert.That(messageOf16Bytes.Length, Is.EqualTo(16));
 		Assert.IsFalse(messageOfManyBytes.Length % 16 == 0, "Lenght of message of many bytes should NOT be divisable by 16");
 		Assert.IsTrue(messageOf64Bytes.Length % 16 == 0, "Lenght of message of 64 bytes should be divisable by 16");
 
-		Assert.AreEqual(16, nonce.Length);
-		Assert.AreEqual(16, key.Length);
+		Assert.That(nonce.Length, Is.EqualTo(16));
+		Assert.That(key.Length, Is.EqualTo(16));
 
 		CollectionAssert.AreNotEqual(nonce.ToArray(), key.ToArray());
 
@@ -60,7 +60,7 @@ public class Asconaead128Tests
 		CollectionAssert.AreEqual(encryptedManyBytesPlusTag, messageOf64BytesEncrypted);
 	}
 
-	//[Test, Description("Test non power of two message and associated data lengths")]
+	[Test, Description("Test non power of two message and associated data lengths")]
 	public void NonPowerOfTwoLegacyApiTest()
 	{
 		// Arrange
@@ -77,9 +77,9 @@ public class Asconaead128Tests
 		func_ret = Asconaead128.crypto_aead_decrypt(msg2, out int mlen2, null, ct, clen, ad, ad.Length, nonce, key);
 
 		// Assert
-		Assert.AreEqual(0, func_ret, $"crypto_aead_decrypt returned {func_ret}");
-		CollectionAssert.AreNotEqual(ct.Take(msg.Length), msg, "Encrypted message should not contain plaintext message");
-		CollectionAssert.AreEqual(msg, msg2, "Message before encryption should match message after decryption");
+		Assert.That(func_ret, Is.EqualTo(0), $"crypto_aead_decrypt returned {func_ret}");
+		Assert.That(ct.Take(msg.Length), Is.Not.EqualTo(msg), "Encrypted message should not contain plaintext message");
+		Assert.That(msg2, Is.EqualTo(msg), "Message before encryption should match message after decryption");
 	}
 	
 	[Test, Description("Test out GenKat inputs")]

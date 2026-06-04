@@ -22,6 +22,9 @@ public static class Common
 
 	public static void init_buffer(byte[] buffer, int numbytes, byte add) 
 	{
-		for (int i = 0; i < numbytes; i++) buffer[i] = (byte)(i + add);
+		for (int i = 0; i < numbytes; i++)
+		{
+			buffer[i] = (byte)(i + add);
+		} 
 	}
 }

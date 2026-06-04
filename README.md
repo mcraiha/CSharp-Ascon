@@ -1,6 +1,6 @@
 # CSharp-Ascon
 
-Managed C# (CSharp) implementation of [Ascon](https://ascon.iaik.tugraz.at/index.html) (Ascon-128 and Ascon-128a)
+Managed C# (CSharp) implementation of [Ascon](https://ascon.iaik.tugraz.at/index.html) (Ascon-AEAD128, Ascon-Hash256 and Ascon-XOF128). Ascon is standardized as NIST SP 800-232: https://csrc.nist.gov/pubs/sp/800/232/final
 
 ## Build status
 
@@ -18,13 +18,13 @@ I needed a weekend project for myself
 
 Currently the basic API is similar to C based one. There is also a fancy API for easier operations.
 
-Both Ascon-128 (Ascon128v12.cs) and Ascon-128a (Ascon128av12.cs) are standalone files, so you can copy either one of them to your project and just use it.
+Ascon-AEAD128, Ascon-Hash256 and Ascon-XOF128 are implemented in standalone files, so you can copy any one of those to your project and just use it.
 
-❗ Do **NOT** reuse same key + nonce combination. Always change at least the nonce when you create a new encrypted message ❗
+❗If you are using Ascon-AEAD128, do **NOT** reuse same key + nonce combination. Always change at least the nonce when you create a new encrypted message ❗
 
 ### C style API example
 
-With Ascon-128 you can do the following
+#### Ascon-AEAD128
 
 ```cs
 using CSAscon;
@@ -45,44 +45,40 @@ byte[] key = new byte[] { 101, 101, 174, 222, 224, 97, 156, 94, 123, 183, 109, 2
 byte[] encryptedMessage = new byte[message.Length + 16];
 
 // Encrypt
-int func_ret = Ascon128v12.crypto_aead_encrypt(encryptedMessage, out int clen, message, message.Length, associatedData, associatedData.Length, null, nonce, key);
+int func_ret = Asconaead128.crypto_aead_encrypt(encryptedMessage, out int clen, message, message.Length, associatedData, associatedData.Length, null, nonce, key);
 
 // Decrypt
 byte[] decryptedMessage = new byte[message.Length];
-func_ret = Ascon128v12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, encryptedMessage, clen, associatedData, associatedData.Length, nonce, key);
+func_ret = Asconaead128.crypto_aead_decrypt(decryptedMessage, out mlen2, null, encryptedMessage, clen, associatedData, associatedData.Length, nonce, key);
 ```
 
-with Ascon-128a you can do the following
+#### Ascon-Hash256
 
 ```cs
 using CSAscon;
 
-// Message that will be encrypted 
-byte[] message = System.Text.Encoding.UTF8.GetBytes("This message should be encrypted");
+byte[] input = new byte[21] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
+byte[] outputHash = new byte[32];
 
-// Associated data
-byte[] associatedData = System.Text.Encoding.UTF8.GetBytes("Associated data");
+// Hash
+int returnValue = Asconhash256.crypto_hash(outputHash, input);
+```
+(the hash is always 32 bytes / 256 bits)
 
-// Nonce (MUST be 16 bytes)
-byte[] nonce = new byte[] { 6, 74, 86, 166, 217, 45, 90, 73, 241, 65, 165, 45, 215, 47, 94, 73 };
+#### Ascon-XOF128
 
-// Key (MUST be 16 bytes)
-byte[] key = new byte[] { 11, 101, 174, 222, 224, 97, 156, 94, 123, 13, 109, 219, 208, 15, 14, 122 };
+```cs
+using CSAscon;
 
-// Preallocate storage for encrypted data
-byte[] encryptedMessage = new byte[message.Length + 16];
-
-// Encrypt
-int func_ret = Ascon128av12.crypto_aead_encrypt(encryptedMessage, out int clen, message, message.Length, associatedData, associatedData.Length, null, nonce, key);
-
-// Decrypt
-byte[] decryptedMessage = new byte[message.Length];
-func_ret = Ascon128av12.crypto_aead_decrypt(decryptedMessage, out mlen2, null, encryptedMessage, clen, associatedData, associatedData.Length, nonce, key);
+byte[] input = new byte[21] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
+int outputLength = 64;
+byte[] outputHash = new byte[outputLength];
+int returnValue = Asconxof128.crypto_hash(outputHash, input);
 ```
 
 ### Fancy API example
 
-With Ascon-128 you can do the following, test it out in [.NET Fiddle](https://dotnetfiddle.net/AAkKSV)
+#### Ascon-AEAD128
 
 ```cs
 using CSAscon;
@@ -94,33 +90,40 @@ ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
 ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8; // Use better key in real life
 
 // Encrypt
-byte[] encryptedMessage = Ascon128v12.Encrypt(message, associatedData, nonce, key);
+byte[] encryptedMessage = Asconaead128.Encrypt(message, associatedData, nonce, key);
 
 // Decrypt
-byte[] decryptedMessage = Ascon128v12.Decrypt(encryptedMessage, associatedData, nonce, key);
+byte[] decryptedMessage = Asconaead128.Decrypt(encryptedMessage, associatedData, nonce, key);
 ```
 
-With Ascon-128a you can do the following
+#### Ascon-Hash256
 
 ```cs
 using CSAscon;
 
-ReadOnlySpan<byte> message = "This is a very long and boring text for testing purposes 😀 !"u8;
-ReadOnlySpan<byte> associatedData = "My associated data"u8;
+byte[] input = new byte[21] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
 
-ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
-ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8; // Use better key in real life
+// Hash
+byte[] hash = Asconhash256.HashBytes(input);
+```
 
-// Encrypt
-byte[] encryptedMessage = Ascon128av12.Encrypt(message, associatedData, nonce, key);
+(the hash is always 32 bytes / 256 bits)
 
-// Decrypt
-byte[] decryptedMessage = Ascon128av12.Decrypt(encryptedMessage, associatedData, nonce, key);
+#### Ascon-XOF128
+
+```cs
+using CSAscon;
+
+byte[] input = new byte[21] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
+int outputLength = 64;
+
+// Hash
+byte[] hash = Asconxof128.HashBytes(input, outputLength);
 ```
 
 ## Porting story
 
-Code is ported from [opt64](https://github.com/ascon/ascon-c/tree/main/crypto_aead/ascon128v12/opt64) version of the C code version. So it operates 8 bytes (64 bits) at time.
+Code is ported from **opt64** versions of the C code. So all methods operate 8 bytes (64 bits) at time.
 
 ## Limitations
 
@@ -163,4 +166,4 @@ AMD Ryzen 5 7600 3.80GHz, 1 CPU, 12 logical and 6 physical cores
 
 Original [genkat](https://github.com/ascon/ascon-c/blob/main/tests/genkat_aead.c) uses NIST license, so tests in this project are modified from it. 
 
-The tests vector files (**LWC_AEAD_KAT_128_128.txt** and **LWC_AEAD_KAT_128_128_a.txt**) are also generated with genkat tool.
+The tests vector files (**LWC_AEAD_KAT_128_128.txt**, **LWC_XOF_KAT_128_512.txt** and **LWC_HASH_KAT_128_256.txt**) are also generated with genkat tool.

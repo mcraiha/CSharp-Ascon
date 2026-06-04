@@ -1,4 +1,4 @@
-## Version 1.0.0 (released ...)
+## Version 1.0.0 (released 2026-06-04)
 - Added Ascon-AEAD128, Ascon-Hash256 and Ascon-XOF128 (**FEATURE**)
 - Library is now `IsAotCompatible` (**FEATURE**)
 - Dropped Ascon128av12 and Ascon128v12 (**BREAKING**)

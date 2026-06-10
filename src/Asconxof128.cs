@@ -139,9 +139,10 @@ public static class Asconxof128
 
 	private static void P(ascon_state_t s, int nr) 
 	{
-		if (nr == 12) P12ROUNDS(s);
-		if (nr == 8) P8ROUNDS(s);
-		if (nr == 6) P6ROUNDS(s);
+		if (nr == 12)
+		{
+			P12ROUNDS(s);
+		}
 	}
 
 	private static void P12ROUNDS(ascon_state_t s) 
@@ -152,28 +153,6 @@ public static class Asconxof128
 		ROUND(s, RC3);
 		ROUND(s, RC4);
 		ROUND(s, RC5);
-		ROUND(s, RC6);
-		ROUND(s, RC7);
-		ROUND(s, RC8);
-		ROUND(s, RC9);
-		ROUND(s, RCa);
-		ROUND(s, RCb);
-	}
-
-	private static void P8ROUNDS(ascon_state_t s) 
-	{
-		ROUND(s, RC4);
-		ROUND(s, RC5);
-		ROUND(s, RC6);
-		ROUND(s, RC7);
-		ROUND(s, RC8);
-		ROUND(s, RC9);
-		ROUND(s, RCa);
-		ROUND(s, RCb);
-	}
-
-	private static void P6ROUNDS(ascon_state_t s) 
-	{
 		ROUND(s, RC6);
 		ROUND(s, RC7);
 		ROUND(s, RC8);
@@ -218,12 +197,6 @@ public static class Asconxof128
 		return 0x01ul << (8 * i);
 	}
 
-	private static ulong MASK(int n) 
-	{
-		/* undefined for n == 0 */
-		return ~0ul << (64 - 8 * n);
-	}
-
 	private static ulong LOAD(ReadOnlyMemory<byte> bytes, int n) 
 	{
 		if (n < 8)
@@ -237,11 +210,6 @@ public static class Asconxof128
 		{
 			return BitConverter.ToUInt64(bytes.Span);
 		}
-	}
-
-	private static ulong LOADBYTES(byte[] bytes, int n) 
-	{
-		return BitConverter.ToUInt64(bytes);
 	}
 
 	private static void STOREBYTES(Memory<byte> bytes, ulong w, int n) 

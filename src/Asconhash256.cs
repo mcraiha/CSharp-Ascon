@@ -175,6 +175,51 @@ public static class Asconhash256
 	}
 
 	/// <summary>
+	/// Get Asconhash256 for given Stream input async
+	/// </summary>
+	/// <param name="input">Stream</param>
+	/// <returns>Byte[] that contains the 32 bytes of hash</returns>
+	/// <exception cref="ArgumentException">Stream must be readable</exception>
+	public static async Task<byte[]> HashBytesAsync(Stream input)
+	{
+		if (!input.CanRead)
+		{
+			throw new ArgumentException("Stream for hash operation must be readable!");
+		}
+
+		byte[] returnValue = new byte[CRYPTO_BYTES];
+
+		ascon_state_t s = new ascon_state_t();
+
+		ascon_inithash(ref s);
+
+		/* absorb full plaintext blocks */
+		Memory<byte> smallBuffer = new byte[8];
+		bool loop = true;
+		while (loop)
+		{
+			int readAmount = await input.ReadAtLeastAsync(smallBuffer, ASCON_HASH_RATE, throwOnEndOfStream: false);
+			if (readAmount == ASCON_HASH_RATE)
+			{
+				s.x[0] ^= LOAD(smallBuffer, 8);
+				P(s, ASCON_HASH_ROUNDS);
+			}	
+			else
+			{
+				loop = false;
+
+				/* absorb final plaintext block */
+				s.x[0] ^= LOAD(smallBuffer.Slice(0, readAmount), readAmount);
+				s.x[0] ^= PAD(readAmount);
+			}
+		}
+
+		ascon_squeeze(ref s, returnValue, CRYPTO_BYTES);
+
+		return returnValue;
+	}
+
+	/// <summary>
 	/// Get Asconhash256 for given input
 	/// </summary>
 	/// <param name="output">Memory output (must be at least 32 bytes!)</param>

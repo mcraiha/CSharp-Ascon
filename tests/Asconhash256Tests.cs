@@ -75,6 +75,21 @@ public class Asconhash256Tests
 		}
 	}
 
+	[Test, Description("Test some simple stream inputs with HashBytesAsync")]
+	public async Task SimpleInputsStreamAsyncTest()
+	{
+		// Arrange
+
+		// Act
+
+		// Assert
+		foreach ((byte[] expected, byte[] input) in expectedAndInputSimple)
+		{
+			byte[] hash = await Asconhash256.HashBytesAsync(new MemoryStream(input));
+			Assert.That(hash, Is.EqualTo(expected), $"Input: {Convert.ToHexString(input)}");
+		}
+	}
+
 	[Test, Description("Test out GenKat inputs")]
 	public void GenKatTest()
 	{

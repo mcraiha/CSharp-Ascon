@@ -176,6 +176,54 @@ public static class Asconxof128
 	}
 
 	/// <summary>
+	/// Get Asconxof128 for given Stream input async
+	/// </summary>
+	/// <param name="input">Stream</param>
+	/// <param name="wantedHashLengthInBytes">How many bytes of hash is wanted (must be at least 1)</param>
+	/// <returns>Byte[] that contains the wantedHasLengthInBytes bytes of hash</returns>
+	/// <exception cref="ArgumentException">Stream must be readable</exception>
+	public static async Task<byte[]> HashBytesAsync(Stream input, int wantedHashLengthInBytes)
+	{
+		if (!input.CanRead)
+		{
+			throw new ArgumentException("Stream for hash operation must be readable!");
+		}
+
+		ArgumentOutOfRangeException.ThrowIfLessThan<int>(wantedHashLengthInBytes, 1, "wantedHashLengthInBytes must be at least 1");
+
+		byte[] returnValue = new byte[wantedHashLengthInBytes];
+
+		ascon_state_t s = new ascon_state_t();
+
+		ascon_inithash(ref s);
+
+		/* absorb full plaintext blocks */
+		Memory<byte> smallBuffer = new byte[8];
+		bool loop = true;
+		while (loop)
+		{
+			int readAmount = await input.ReadAtLeastAsync(smallBuffer, ASCON_HASH_RATE, throwOnEndOfStream: false);
+			if (readAmount == ASCON_HASH_RATE)
+			{
+				s.x[0] ^= LOAD(smallBuffer, 8);
+				P(s, ASCON_HASH_ROUNDS);
+			}	
+			else
+			{
+				loop = false;
+
+				/* absorb final plaintext block */
+				s.x[0] ^= LOAD(smallBuffer.Slice(0, readAmount), readAmount);
+				s.x[0] ^= PAD(readAmount);
+			}
+		}
+
+		ascon_squeeze(ref s, returnValue, wantedHashLengthInBytes);
+
+		return returnValue;
+	}
+
+	/// <summary>
 	/// Get Asconxof128 for given input
 	/// </summary>
 	/// <param name="output">Memory output (must be at least 1 byte!)</param>

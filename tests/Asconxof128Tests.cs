@@ -68,6 +68,21 @@ public class Asconxof128Tests
 		}
 	}
 
+	[Test, Description("Test some simple stream inputs with HashBytesAsync")]
+	public async Task SimpleInputsStreamAsyncTest()
+	{
+		// Arrange
+
+		// Act
+
+		// Assert
+		foreach ((byte[] expected, int outputLength, byte[] input) in expectedAndInput)
+		{
+			byte[] hash = await Asconxof128.HashBytesAsync(new MemoryStream(input), outputLength);
+			Assert.That(hash, Is.EqualTo(expected), $"Input: {Convert.ToHexString(input)}");
+		}
+	}
+
 	[Test, Description("Test out GenKat inputs")]
 	public void GenKatTest()
 	{

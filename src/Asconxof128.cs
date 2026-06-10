@@ -114,10 +114,12 @@ public static class Asconxof128
 	/// Get Asconxof128 for given input
 	/// </summary>
 	/// <param name="input">ReadOnlyMemory of input bytes</param>
-	/// <param name="wantedHashLengthInBytes">How many bytes of hash is wanted</param>
+	/// <param name="wantedHashLengthInBytes">How many bytes of hash is wanted (must be at least 1)</param>
 	/// <returns>Returns byte[] that contains the wantedHasLengthInBytes bytes of hash</returns>
 	public static byte[] HashBytes(ReadOnlyMemory<byte> input, int wantedHashLengthInBytes)
 	{
+		ArgumentOutOfRangeException.ThrowIfLessThan<int>(wantedHashLengthInBytes, 1, "wantedHashLengthInBytes must be at least 1");
+
 		byte[] returnValue = new byte[wantedHashLengthInBytes];
 
 		crypto_hash(returnValue, input);

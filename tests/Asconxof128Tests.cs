@@ -53,6 +53,21 @@ public class Asconxof128Tests
 		}
 	}
 
+	[Test, Description("Test some simple stream inputs with HashBytes")]
+	public void SimpleInputsStreamTest()
+	{
+		// Arrange
+
+		// Act
+
+		// Assert
+		foreach ((byte[] expected, int outputLength, byte[] input) in expectedAndInput)
+		{
+			byte[] hash = Asconxof128.HashBytes(new MemoryStream(input), outputLength);
+			Assert.That(hash, Is.EqualTo(expected), $"Input: {Convert.ToHexString(input)}");
+		}
+	}
+
 	[Test, Description("Test out GenKat inputs")]
 	public void GenKatTest()
 	{

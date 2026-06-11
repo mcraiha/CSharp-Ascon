@@ -116,4 +116,19 @@ public class Asconxof128Tests
 		//Console.WriteLine(sw.ToString());
 		Assert.That(sw.ToString(), Is.EqualTo(expected));
 	}
+
+	[Test, Description("Test out incorrect parameters")]
+	public void IncorrectParametersTest()
+	{
+		// Arrange
+		NonReadableStream nonReadableStream = new NonReadableStream();
+
+		// Act
+		var argumentException1 = Assert.Throws<ArgumentOutOfRangeException>(() => Asconxof128.HashBytes(new byte[0], wantedHashLengthInBytes: 0) );
+		var argumentException2 = Assert.Throws<ArgumentException>(() => Asconxof128.HashBytes(nonReadableStream, wantedHashLengthInBytes: 1) );
+
+		// Assert
+		Assert.That(argumentException1!.Message, Is.EqualTo($"wantedHashLengthInBytes must be at least 1 ('0') must be greater than or equal to '1'. (Parameter 'wantedHashLengthInBytes must be at least 1'){Environment.NewLine}Actual value was 0."));
+		Assert.That(argumentException2!.Message, Is.EqualTo("Stream for hash operation must be readable!"));
+	}
 }

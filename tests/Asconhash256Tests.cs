@@ -123,4 +123,17 @@ public class Asconhash256Tests
 		//Console.WriteLine(sw.ToString());
 		Assert.That(sw.ToString(), Is.EqualTo(expected));
 	}
+
+	[Test, Description("Test out incorrect parameters")]
+	public void IncorrectParametersTest()
+	{
+		// Arrange
+		NonReadableStream nonReadableStream = new NonReadableStream();
+
+		// Act
+		var argumentException1 = Assert.Throws<ArgumentException>(() => Asconhash256.HashBytes(nonReadableStream) );
+
+		// Assert
+		Assert.That(argumentException1!.Message, Is.EqualTo("Stream for hash operation must be readable!"));
+	}
 }

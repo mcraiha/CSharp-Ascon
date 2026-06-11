@@ -141,7 +141,10 @@ public static class Asconaead128
 			}
 
 			s.x[pxIndex] ^= PAD(ad.Length - adOffset);
-			if (ad.Length - adOffset > 0) s.x[pxIndex] ^= LOAD(ad.Slice(adOffset), ad.Length - adOffset);
+			if (ad.Length - adOffset > 0)
+			{
+				s.x[pxIndex] ^= LOAD(ad.Slice(adOffset), ad.Length - adOffset);
+			}
 			P(s, nr);
 		}
 
@@ -252,9 +255,14 @@ public static class Asconaead128
 
 	private static void P(ascon_state_t s, int nr) 
 	{
-		if (nr == 12) P12ROUNDS(s);
-		if (nr == 8) P8ROUNDS(s);
-		if (nr == 6) P6ROUNDS(s);
+		if (nr == 12) 
+		{
+			P12ROUNDS(s);
+		}
+		if (nr == 8)
+		{
+			P8ROUNDS(s);
+		}
 	}
 
 	private static void P12ROUNDS(ascon_state_t s) 
@@ -277,16 +285,6 @@ public static class Asconaead128
 	{
 		ROUND(s, RC4);
 		ROUND(s, RC5);
-		ROUND(s, RC6);
-		ROUND(s, RC7);
-		ROUND(s, RC8);
-		ROUND(s, RC9);
-		ROUND(s, RCa);
-		ROUND(s, RCb);
-	}
-
-	private static void P6ROUNDS(ascon_state_t s) 
-	{
 		ROUND(s, RC6);
 		ROUND(s, RC7);
 		ROUND(s, RC8);

@@ -350,15 +350,57 @@ public class Asconaead128Tests
 		byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
 		byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
 
+		NonReadableStream nonReadableStream = new NonReadableStream();
+		MemoryStream nonWriteableStream = new MemoryStream();
+		nonWriteableStream.Close();
+
 		// Act
-		//var argumentException1 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(new byte[0], associatedDataValid, nonceValid, keyValid) );
-		var argumentException2 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(messageValid, associatedDataValid, new byte[0], keyValid) );
-		var argumentException3 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(messageValid, associatedDataValid, nonceValid, new byte[0]) );
+		var argumentException1 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(messageValid, associatedDataValid, new byte[0], keyValid) );
+		var argumentException2 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(messageValid, associatedDataValid, nonceValid, new byte[0]) );
+
+		var argumentException3 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
+		var argumentException4 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
+
+		var argumentException5 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
+		var argumentException6 = Assert.Throws<ArgumentException>(() => Asconaead128.Encrypt(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
 
 		// Assert
-		//Assert.That(argumentException1!.Message, Is.EqualTo("Message should have some bytes"));
-		Assert.That(argumentException2!.Message, Is.EqualTo("Nonce must be 16 bytes"));
-		Assert.That(argumentException3!.Message, Is.EqualTo("Key must be 16 bytes"));
+		Assert.That(argumentException1!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException2!.Message, Is.EqualTo("Key must be 16 bytes"));
+
+		Assert.That(argumentException3!.Message, Is.EqualTo("Input stream for encrypt operation must be readable!"));
+		Assert.That(argumentException4!.Message, Is.EqualTo("Output stream for encrypt operation must be writable!"));
+
+		Assert.That(argumentException5!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException6!.Message, Is.EqualTo("Key must be 16 bytes"));
+	}
+
+	[Test, Description("Test out incorrect encryption parameters async")]
+	public async Task IncorrectEncryptParametersAsyncTest()
+	{
+		// Arrange
+		byte[] messageValid = "0123456789ABCDEFAABBBCC"u8.ToArray();
+		byte[] associatedDataValid = "Valid associated data"u8.ToArray();
+		byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
+		byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
+
+		NonReadableStream nonReadableStream = new NonReadableStream();
+		MemoryStream nonWriteableStream = new MemoryStream();
+		nonWriteableStream.Close();
+
+		// Act
+		var argumentException1 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
+		var argumentException2 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
+
+		var argumentException3 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
+		var argumentException4 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
+
+		// Assert
+		Assert.That(argumentException1!.Message, Is.EqualTo("Input stream for encrypt operation must be readable!"));
+		Assert.That(argumentException2!.Message, Is.EqualTo("Output stream for encrypt operation must be writable!"));
+
+		Assert.That(argumentException3!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException4!.Message, Is.EqualTo("Key must be 16 bytes"));
 	}
 
 	[Test, Description("Test out incorrect decryption parameters")]
@@ -370,14 +412,58 @@ public class Asconaead128Tests
 		byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
 		byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
 
+		NonReadableStream nonReadableStream = new NonReadableStream();
+		MemoryStream nonWriteableStream = new MemoryStream();
+		nonWriteableStream.Close();
+
 		// Act
 		var argumentException1 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(new byte[0], associatedDataValid, nonceValid, keyValid) );
 		var argumentException2 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(encryptedMessageValid, associatedDataValid, new byte[0], keyValid) );
 		var argumentException3 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(encryptedMessageValid, associatedDataValid, nonceValid, new byte[0]) );
 
+		var argumentException4 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
+		var argumentException5 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
+
+		var argumentException6 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
+		var argumentException7 = Assert.Throws<ArgumentException>(() => Asconaead128.Decrypt(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
+
 		// Assert
 		Assert.That(argumentException1!.Message, Is.EqualTo("Encrypted bytes should have at least 16 bytes"));
 		Assert.That(argumentException2!.Message, Is.EqualTo("Nonce must be 16 bytes"));
 		Assert.That(argumentException3!.Message, Is.EqualTo("Key must be 16 bytes"));
+
+		Assert.That(argumentException4!.Message, Is.EqualTo("Input stream for decrypt operation must be readable!"));
+		Assert.That(argumentException5!.Message, Is.EqualTo("Output stream for decrypt operation must be writable!"));
+
+		Assert.That(argumentException6!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException7!.Message, Is.EqualTo("Key must be 16 bytes"));
+	}
+
+	[Test, Description("Test out incorrect decryption parameters async")]
+	public async Task IncorrectDecryptParametersAsyncTest()
+	{
+		// Arrange
+		byte[] encryptedMessageValid = "0123456789ABCDEFAABBBCABABABAC"u8.ToArray();
+		byte[] associatedDataValid = "Valid associated data"u8.ToArray();
+		byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
+		byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
+
+		NonReadableStream nonReadableStream = new NonReadableStream();
+		MemoryStream nonWriteableStream = new MemoryStream();
+		nonWriteableStream.Close();
+
+		// Act
+		var argumentException1 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
+		var argumentException2 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
+
+		var argumentException3 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
+		var argumentException4 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
+
+		// Assert
+		Assert.That(argumentException1!.Message, Is.EqualTo("Input stream for decrypt operation must be readable!"));
+		Assert.That(argumentException2!.Message, Is.EqualTo("Output stream for decrypt operation must be writable!"));
+
+		Assert.That(argumentException3!.Message, Is.EqualTo("Nonce must be 16 bytes"));
+		Assert.That(argumentException4!.Message, Is.EqualTo("Key must be 16 bytes"));
 	}
 }

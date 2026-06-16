@@ -285,6 +285,62 @@ public class Asconaead128Tests
 		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
 	}
 
+	[Test, Description("Test out GenKat inputs with fancy API using streams async")]
+	public async Task GenKatTestFancyStreamsAsync()
+	{
+		// Arrange
+		byte[] key = new byte[Asconaead128.CRYPTO_KEYBYTES];
+		byte[] nonce = new byte[Asconaead128.CRYPTO_NPUBBYTES];
+		byte[] msg = new byte[Common.MAX_MESSAGE_LENGTH];
+		byte[] ad = new byte[Common.MAX_ASSOCIATED_DATA_LENGTH];
+		int count = 1;
+
+		string expectedKat = File.ReadAllText("LWC_AEAD_KAT_128_128.txt");
+
+		StringWriter sw = new StringWriter();
+
+		Common.init_buffer(key, key.Length, add: 0);
+		Common.init_buffer(nonce, nonce.Length, add: 16);
+		Common.init_buffer(msg, msg.Length, add: 32);
+		Common.init_buffer(ad, ad.Length, add: 48);
+
+		// Act
+
+		// Assert
+		for (int mlen = 0; mlen <= Common.MAX_MESSAGE_LENGTH; mlen++) 
+		{
+			for (int adlen = 0; adlen <= Common.MAX_ASSOCIATED_DATA_LENGTH; adlen++) 
+			{
+				sw.Write($"Count = {count}\n");
+				count++;
+				Common.WriteToString(sw, "Key = ", key, Asconaead128.CRYPTO_KEYBYTES);
+				Common.WriteToString(sw, "Nonce = ", nonce, Asconaead128.CRYPTO_NPUBBYTES);
+				Common.WriteToString(sw, "PT = ", msg, mlen);
+				Common.WriteToString(sw, "AD = ", ad, adlen);
+
+				MemoryStream inputStream = new MemoryStream(msg, 0, mlen);
+				MemoryStream encryptedStream = new MemoryStream();
+				await Asconaead128.EncryptAsync(inputStream, encryptedStream, new ReadOnlyMemory<byte>(ad, 0, adlen), nonce, key);
+				encryptedStream.Position = 0;
+				byte[] encrypted = encryptedStream.ToArray();
+				Common.WriteToString(sw, "CT = ", encrypted, encrypted.Length);
+				sw.Write("\n");
+
+				MemoryStream decryptedMessageMs = new MemoryStream();
+				int func_ret = await Asconaead128.DecryptAsync(encryptedStream, decryptedMessageMs, new ReadOnlyMemory<byte>(ad, 0, adlen), nonce, key);
+				Assert.That(func_ret, Is.EqualTo(0), $"Asconaead128.Decrypt for stream returned {func_ret}");
+
+				byte[] decrypted = decryptedMessageMs.ToArray();
+
+				Assert.That(decrypted.Length, Is.EqualTo(mlen), $"Decrypt returned bad 'mlen': Got <{decrypted.Length}>, expected <{mlen}>");
+
+				Assert.That(decrypted, Is.EqualTo(msg.Take(mlen)), "Decrypt did not recover the plaintext");
+			}
+		}
+		//Console.WriteLine(sw.ToString());
+		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
+	}
+
 	[Test, Description("Test out incorrect encryption parameters")]
 	public void IncorrectEncryptParametersTest()
 	{

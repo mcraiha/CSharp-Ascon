@@ -393,6 +393,20 @@ public static class Asconaead128
 		}
 	}
 
+	private static async Task STOREBYTESAsync(Stream output, ulong w, int n) 
+	{
+		Memory<byte> tempArray = new byte[8];
+		BinaryPrimitives.WriteUInt64LittleEndian(tempArray.Span, w);
+		if (n == 8)
+		{
+			await output.WriteAsync(tempArray);
+		}
+		else
+		{
+			await output.WriteAsync(tempArray.Slice(0, n));
+		}
+	}
+
 	private static ulong ROR(ulong x, int n) 
 	{
 		return BitOperations.RotateRight(x, n);
@@ -516,6 +530,96 @@ public static class Asconaead128
 		/* set tag */
 		STOREBYTES(encryptedOutput, s.x[3], 8);
 		STOREBYTES(encryptedOutput, s.x[4], 8);
+	}
+
+	/// <summary>
+	/// Encrypt message stream (add associated data) with given nonce and key, async
+	/// </summary>
+	/// <param name="messageInput">Message input stream</param>
+	/// <param name="encryptedOutput">Encrypted output stream</param>
+	/// <param name="associatedData">Associated data (0 - N bytes)</param>
+	/// <param name="nonce">Nonce (16 bytes)</param>
+	/// <param name="key">Key (16 bytes)</param>
+	/// <exception cref="ArgumentException"></exception>
+	public static async Task EncryptAsync(Stream messageInput, Stream encryptedOutput, ReadOnlyMemory<byte> associatedData, ReadOnlyMemory<byte> nonce, ReadOnlyMemory<byte> key)
+	{
+		if (!messageInput.CanRead)
+		{
+			throw new ArgumentException("Input stream for encrypt operation must be readable!");
+		}
+
+		if (!encryptedOutput.CanWrite)
+		{
+			throw new ArgumentException("Output stream for encrypt operation must be writable!");
+		}
+
+		if (nonce.Length != CRYPTO_NPUBBYTES)
+		{
+			throw new ArgumentException($"Nonce must be {CRYPTO_NPUBBYTES} bytes");
+		}
+
+		if (key.Length != CRYPTO_KEYBYTES)
+		{
+			throw new ArgumentException($"Key must be {CRYPTO_KEYBYTES} bytes");
+		}
+
+		ascon_state_t s = new ascon_state_t();
+
+		/* perform ascon computation */
+		ascon_key_t asconKey = new ascon_key_t();
+		ascon_loadkey(ref asconKey, key);
+		ascon_initaead(ref s, asconKey, nonce);
+		ascon_adata(ref s, associatedData);
+
+		const int nr = (ASCON_AEAD_RATE == 8) ? 6 : 8;
+
+		/* full plaintext blocks */
+		Memory<byte> smallBuffer = new byte[ASCON_AEAD_RATE];
+		bool loop = true;
+		while (loop)
+		{
+			int readAmount = await messageInput.ReadAtLeastAsync(smallBuffer, ASCON_AEAD_RATE, throwOnEndOfStream: false);
+			if (readAmount == ASCON_AEAD_RATE)
+			{
+				s.x[0] ^= LOAD(smallBuffer, 8);
+				await STOREBYTESAsync(encryptedOutput, s.x[0], 8);
+
+				s.x[1] ^= LOAD(smallBuffer.Slice(8), 8);
+				await STOREBYTESAsync(encryptedOutput, s.x[1], 8);
+
+				P(s, nr);
+			}
+			else
+			{
+				loop = false;
+
+				/* final associated data block */
+				int pxIndex = 0;
+
+				int additionalOffset = 0;
+
+				if (readAmount >= 8) 
+				{
+					s.x[0] ^= LOAD(smallBuffer, 8);
+					await STOREBYTESAsync(encryptedOutput, s.x[0], 8);
+					pxIndex = 1;
+					additionalOffset += 8;
+				}
+
+				s.x[pxIndex] ^= PAD(readAmount - additionalOffset);
+				if (readAmount - additionalOffset > 0) 
+				{
+					s.x[pxIndex] ^= LOAD(smallBuffer.Slice(additionalOffset, readAmount - additionalOffset), readAmount - additionalOffset);
+					await STOREBYTESAsync(encryptedOutput, s.x[pxIndex], readAmount - additionalOffset);
+				}
+			}
+		}
+
+		ascon_final(ref s, asconKey);
+
+		/* set tag */
+		await STOREBYTESAsync(encryptedOutput, s.x[3], 8);
+		await STOREBYTESAsync(encryptedOutput, s.x[4], 8);
 	}
 
 	/// <summary>
@@ -658,6 +762,122 @@ public static class Asconaead128
 					ulong cx = LOAD(primaryBuffer.Slice(additionalOffset, readAmount - additionalOffset), readAmount - additionalOffset);
 					s.x[pxIndex] ^= cx;
 					STOREBYTES(decryptedOutput, s.x[pxIndex], readAmount - additionalOffset);
+					s.x[pxIndex] = CLEAR(s.x[pxIndex], readAmount - additionalOffset);
+					s.x[pxIndex] ^= cx;
+				}
+			}
+		}
+
+		ascon_final(ref s, asconKey);
+		/* verify tag (should be constant time, check compiler output) */
+		s.x[3] ^= LOAD(tagBuffer, 8);
+		s.x[4] ^= LOAD(tagBuffer.Slice(8), 8);
+		return NOTZERO(s.x[3], s.x[4]);
+	}
+
+	/// <summary>
+	/// Decrypt encoded message and verify tag, async
+	/// </summary>
+	/// <param name="encryptedInput">Encrypted stream input</param>
+	/// <param name="decryptedOutput">Decrypted stream output</param>
+	/// <param name="associatedData">Associated data (0 - N bytes)</param>
+	/// <param name="nonce">Nonce (16 bytes)</param>
+	/// <param name="key">Key (16 bytes)</param>
+	/// <returns>0 on success; Otherwise failure</returns>
+	/// <exception cref="ArgumentException"></exception>
+	public static async Task<int> DecryptAsync(Stream encryptedInput, Stream decryptedOutput, ReadOnlyMemory<byte> associatedData, ReadOnlyMemory<byte> nonce, ReadOnlyMemory<byte> key)
+	{
+		if (!encryptedInput.CanRead)
+		{
+			throw new ArgumentException("Input stream for decrypt operation must be readable!");
+		}
+
+		if (!decryptedOutput.CanWrite)
+		{
+			throw new ArgumentException("Output stream for decrypt operation must be writable!");
+		}
+
+		if (nonce.Length != CRYPTO_NPUBBYTES)
+		{
+			throw new ArgumentException($"Nonce must be {CRYPTO_NPUBBYTES} bytes");
+		}
+
+		if (key.Length != CRYPTO_KEYBYTES)
+		{
+			throw new ArgumentException($"Key must be {CRYPTO_KEYBYTES} bytes");
+		}
+
+		ascon_state_t s = new ascon_state_t();
+
+		/* perform ascon computation */
+		ascon_key_t asconKey = new ascon_key_t();
+		ascon_loadkey(ref asconKey, key);
+		ascon_initaead(ref s, asconKey, nonce);
+		ascon_adata(ref s, associatedData);
+		
+		const int nr = (ASCON_AEAD_RATE == 8) ? 6 : 8;
+		/* full ciphertext blocks */
+		Memory<byte> primaryBuffer = new byte[ASCON_AEAD_RATE]; // This can be optimized
+		Memory<byte> secondaryyBuffer = new byte[ASCON_AEAD_RATE];
+		Memory<byte> tagBuffer = new byte[CRYPTO_ABYTES];
+
+		int readAmount = await encryptedInput.ReadAtLeastAsync(primaryBuffer, ASCON_AEAD_RATE, throwOnEndOfStream: false);
+
+		if (readAmount < CRYPTO_ABYTES)
+		{
+			// Not enough bytes for tag
+			return -1;
+		}
+
+		bool loop = true;
+		while (loop)
+		{
+			readAmount = await encryptedInput.ReadAtLeastAsync(secondaryyBuffer, ASCON_AEAD_RATE, throwOnEndOfStream: false);
+
+			if (readAmount == ASCON_AEAD_RATE)
+			{
+				ulong cx = LOAD(primaryBuffer, 8);
+				s.x[0] ^= cx;
+				await STOREBYTESAsync(decryptedOutput, s.x[0], 8);
+				s.x[0] = cx;
+
+				cx = LOAD(primaryBuffer.Slice(8), 8);
+				s.x[1] ^= cx;
+				await STOREBYTESAsync(decryptedOutput, s.x[1], 8);
+				s.x[1] = cx;
+				
+				P(s, nr);
+
+				secondaryyBuffer.CopyTo(primaryBuffer);
+			}
+			else
+			{
+				loop = false;
+
+				secondaryyBuffer.Slice(0, readAmount).CopyTo(tagBuffer.Slice(CRYPTO_ABYTES - readAmount));
+				primaryBuffer.Slice(readAmount, CRYPTO_ABYTES - readAmount).CopyTo(tagBuffer);
+
+				/* final ciphertext block */
+				int pxIndex = 0;
+
+				int additionalOffset = 0;
+
+				if (readAmount >= 8)
+				{
+					ulong cx = LOAD(primaryBuffer, 8);
+					s.x[0] ^= cx;
+					await STOREBYTESAsync(decryptedOutput, s.x[0], 8);
+					s.x[0] = cx;
+					pxIndex = 1;
+					additionalOffset += 8;
+				}
+
+				s.x[pxIndex] ^= PAD(readAmount - additionalOffset);
+				if (readAmount - additionalOffset > 0) 
+				{
+					ulong cx = LOAD(primaryBuffer.Slice(additionalOffset, readAmount - additionalOffset), readAmount - additionalOffset);
+					s.x[pxIndex] ^= cx;
+					await STOREBYTESAsync(decryptedOutput, s.x[pxIndex], readAmount - additionalOffset);
 					s.x[pxIndex] = CLEAR(s.x[pxIndex], readAmount - additionalOffset);
 					s.x[pxIndex] ^= cx;
 				}

@@ -131,12 +131,14 @@ Only [little-endian](https://en.wikipedia.org/wiki/Endianness) (LE) systems (x86
 
 ## Benchmarks
 
-You can run benchmarks by moving to **benchmarks** folder and running following command
+You can run benchmarks by moving to [benchmarks](benchmarks) folder and running following commands
+
+### Asconaead128
 ```bash
-dotnet run -c Release
+dotnet run -c Release 1
 ```
 
-there are four different input sizes (64 bytes, 1024 bytes, 65536 bytes and 1 MiB) and comparisons are done between Ascon-128 and Ascon-128a
+there are four different input sizes (64 bytes, 1024 bytes, 65536 bytes and 1 MiB)
 
 Below is one run of the benchmark  
 ```
@@ -153,6 +155,58 @@ AMD Ryzen 5 7600 3.80GHz, 1 CPU, 12 logical and 6 physical cores
 | Encrypt_1024bytes_Ascon128    |     5,474.4 ns |      7.36 ns |      5.75 ns |      - |     104 B |
 | Encrypt_65536bytes_Ascon128   |   330,002.3 ns |  1,648.61 ns |  1,376.67 ns |      - |     104 B |
 | Encrypt_1048576bytes_Ascon128 | 5,267,676.1 ns | 17,209.34 ns | 14,370.58 ns |      - |     104 B |
+
+```
+
+### Asconhash256
+
+```bash
+dotnet run -c Release 2
+```
+
+there are four different input sizes (64 bytes, 1024 bytes, 65536 bytes and 1 MiB)
+
+Below is one run of the benchmark 
+```
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8655/25H2/2025Update/HudsonValley2)
+AMD Ryzen 5 7600 3.80GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 10.0.100
+  [Host]     : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+  DefaultJob : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+
+
+| Method           | Mean          | Error      | StdDev     | Gen0   | Allocated |
+|----------------- |--------------:|-----------:|-----------:|-------:|----------:|
+| Hash64Bytes      |      1.318 us |  0.0020 us |  0.0016 us | 0.0057 |     120 B |
+| Hash1024Bytes    |     14.130 us |  0.1653 us |  0.1380 us |      - |     120 B |
+| Hash65536Bytes   |    872.998 us | 10.0247 us |  8.3711 us |      - |     120 B |
+| Hash1048576Bytes | 13,931.216 us | 97.0266 us | 75.7520 us |      - |     120 B |
+
+```
+
+### Asconxof128
+
+```bash
+dotnet run -c Release 3
+```
+
+there are four different input sizes (64 bytes, 1024 bytes, 65536 bytes and 1 MiB) and output is 16 bytes of hash
+
+Below is one run of the benchmark 
+```
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8655/25H2/2025Update/HudsonValley2)
+AMD Ryzen 5 7600 3.80GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 10.0.100
+  [Host]     : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+  DefaultJob : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+
+
+| Method           | Mean          | Error       | StdDev      | Gen0   | Allocated |
+|----------------- |--------------:|------------:|------------:|-------:|----------:|
+| Hash64Bytes      |      1.099 us |   0.0026 us |   0.0020 us | 0.0057 |     104 B |
+| Hash1024Bytes    |     14.000 us |   0.2158 us |   0.2019 us |      - |     104 B |
+| Hash65536Bytes   |    866.776 us |  15.2567 us |  14.2711 us |      - |     104 B |
+| Hash1048576Bytes | 13,866.632 us | 187.6229 us | 175.5026 us |      - |     104 B |
 
 ```
 

@@ -53,10 +53,105 @@ public class Asconaead128Bench
 	public int Encrypt_1048576bytes_Ascon128() => Asconaead128.crypto_aead_encrypt(encrypted1048576, out _, msg1048576, msg1048576.Length, ad, ad.Length, null, nonce128, key128);
 }
 
+[MemoryDiagnoser]
+public class Asconhash256Bench
+{
+	// Messages (these are filled in constructor)
+	private byte[] msg64 = new byte[64];
+	private byte[] msg1024 = new byte[1024];
+	private byte[] msg65536 = new byte[65536];
+	private byte[] msg1048576 = new byte[1048576];
+
+	public Asconhash256Bench()
+	{
+		Random rnd = new Random();
+		rnd.NextBytes(msg64);
+		rnd.NextBytes(msg1024);
+		rnd.NextBytes(msg65536);
+		rnd.NextBytes(msg1048576);
+	}
+
+	// 64 bytes message
+	[Benchmark]
+	public byte[] Hash64Bytes() => Asconhash256.HashBytes(msg64);
+
+	// 1024 bytes message
+	[Benchmark]
+	public byte[] Hash1024Bytes() => Asconhash256.HashBytes(msg1024);
+
+	// 65536 bytes message
+	[Benchmark]
+	public byte[] Hash65536Bytes() => Asconhash256.HashBytes(msg65536);
+
+	// 1048576 bytes message
+	[Benchmark]
+	public byte[] Hash1048576Bytes() => Asconhash256.HashBytes(msg1048576);
+}
+
+[MemoryDiagnoser]
+public class Asconxof128Bench
+{
+	// Messages (these are filled in constructor)
+	private byte[] msg64 = new byte[64];
+	private byte[] msg1024 = new byte[1024];
+	private byte[] msg65536 = new byte[65536];
+	private byte[] msg1048576 = new byte[1048576];
+
+	public Asconxof128Bench()
+	{
+		Random rnd = new Random();
+		rnd.NextBytes(msg64);
+		rnd.NextBytes(msg1024);
+		rnd.NextBytes(msg65536);
+		rnd.NextBytes(msg1048576);
+	}
+
+	// 64 bytes message
+	[Benchmark]
+	public byte[] Hash64Bytes() => Asconxof128.HashBytes(msg64, 16);
+
+	// 1024 bytes message
+	[Benchmark]
+	public byte[] Hash1024Bytes() => Asconxof128.HashBytes(msg1024, 16);
+
+	// 65536 bytes message
+	[Benchmark]
+	public byte[] Hash65536Bytes() => Asconxof128.HashBytes(msg65536, 16);
+
+	// 1048576 bytes message
+	[Benchmark]
+	public byte[] Hash1048576Bytes() => Asconxof128.HashBytes(msg1048576, 16);
+}
+
 class Program
 {
+	private static readonly string help = """
+	Please select benchmark:
+	1. Asconaead128
+	2. Asconhash256
+	3. Asconxof128
+
+	e.g. dotnet run -c Release 1
+	""";
 	static void Main(string[] args)
 	{
-		var summary = BenchmarkRunner.Run<Asconaead128Bench>();
+		if (args.Length < 1)
+		{
+			Console.WriteLine(help);
+			return;
+		}
+
+		if (args[0] == "1")
+		{
+			var summary = BenchmarkRunner.Run<Asconaead128Bench>();
+		}
+		if (args[0] == "2")
+		{
+			var summary = BenchmarkRunner.Run<Asconhash256Bench>();
+		}
+		if (args[0] == "3")
+		{
+			var summary = BenchmarkRunner.Run<Asconxof128Bench>();
+		}
 	}
 }

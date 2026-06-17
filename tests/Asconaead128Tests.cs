@@ -16,6 +16,8 @@ public class Asconaead128Tests
 	private static readonly byte[] nonce = "MY_CAT_IS_NOT_IT"u8.ToArray();
 	private static readonly byte[] key = "DO_NOT_USE_IN_PR"u8.ToArray();
 
+	private static readonly string expectedKat = File.ReadAllText("LWC_AEAD_KAT_128_128.txt");
+
 	[SetUp]
 	public void Setup()
 	{
@@ -133,8 +135,6 @@ public class Asconaead128Tests
 		int count = 1;
 		int func_ret, ret_val = Common.KAT_SUCCESS;
 
-		string expectedKat = File.ReadAllText("LWC_AEAD_KAT_128_128.txt");
-
 		StringWriter sw = new StringWriter();
 
 		Common.init_buffer(key, key.Length, add: 0);
@@ -190,8 +190,6 @@ public class Asconaead128Tests
 		byte[] ad = new byte[Common.MAX_ASSOCIATED_DATA_LENGTH];
 		int count = 1;
 
-		string expectedKat = File.ReadAllText("LWC_AEAD_KAT_128_128.txt");
-
 		StringWriter sw = new StringWriter();
 
 		Common.init_buffer(key, key.Length, add: 0);
@@ -239,8 +237,6 @@ public class Asconaead128Tests
 		byte[] ad = new byte[Common.MAX_ASSOCIATED_DATA_LENGTH];
 		int count = 1;
 
-		string expectedKat = File.ReadAllText("LWC_AEAD_KAT_128_128.txt");
-
 		StringWriter sw = new StringWriter();
 
 		Common.init_buffer(key, key.Length, add: 0);
@@ -263,14 +259,14 @@ public class Asconaead128Tests
 				Common.WriteToString(sw, "AD = ", ad, adlen);
 
 				MemoryStream inputStream = new MemoryStream(msg, 0, mlen);
-				MemoryStream encryptedStream = new MemoryStream();
+				MemoryStream encryptedStream = new MemoryStream(capacity: mlen + Asconaead128.CRYPTO_ABYTES);
 				Asconaead128.Encrypt(inputStream, encryptedStream, new ReadOnlyMemory<byte>(ad, 0, adlen), nonce, key);
 				encryptedStream.Position = 0;
 				byte[] encrypted = encryptedStream.ToArray();
 				Common.WriteToString(sw, "CT = ", encrypted, encrypted.Length);
 				sw.Write("\n");
 
-				MemoryStream decryptedMessageMs = new MemoryStream();
+				MemoryStream decryptedMessageMs = new MemoryStream(capacity: mlen);
 				int func_ret = Asconaead128.Decrypt(encryptedStream, decryptedMessageMs, new ReadOnlyMemory<byte>(ad, 0, adlen), nonce, key);
 				Assert.That(func_ret, Is.EqualTo(0), $"Asconaead128.Decrypt for stream returned {func_ret}");
 
@@ -294,8 +290,6 @@ public class Asconaead128Tests
 		byte[] msg = new byte[Common.MAX_MESSAGE_LENGTH];
 		byte[] ad = new byte[Common.MAX_ASSOCIATED_DATA_LENGTH];
 		int count = 1;
-
-		string expectedKat = File.ReadAllText("LWC_AEAD_KAT_128_128.txt");
 
 		StringWriter sw = new StringWriter();
 

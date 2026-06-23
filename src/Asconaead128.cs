@@ -422,7 +422,7 @@ public static class Asconaead128
 	/// <param name="nonce">Nonce (16 bytes)</param>
 	/// <param name="key">Key (16 bytes)</param>
 	/// <returns>Encrypted byte array (size is 16 bytes more than message's size)</returns>
-	/// <exception cref="ArgumentException"></exception>
+	/// <exception cref="ArgumentException">If nonce doesn't have correct amount of bytes or key doesn't have correct amount of bytes</exception>
 	public static byte[] Encrypt(ReadOnlySpan<byte> message, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
 	{
 		if (nonce.Length != CRYPTO_NPUBBYTES)
@@ -450,7 +450,7 @@ public static class Asconaead128
 	/// <param name="associatedData">Associated data (0 - N bytes)</param>
 	/// <param name="nonce">Nonce (16 bytes)</param>
 	/// <param name="key">Key (16 bytes)</param>
-	/// <exception cref="ArgumentException"></exception>
+	/// <exception cref="ArgumentException">If streams cannot be processed, or nonce doesn't have correct amount of bytes or key doesn't have correct amount of bytes</exception>
 	public static void Encrypt(Stream messageInput, Stream encryptedOutput, ReadOnlyMemory<byte> associatedData, ReadOnlyMemory<byte> nonce, ReadOnlyMemory<byte> key)
 	{
 		if (!messageInput.CanRead)
@@ -540,7 +540,7 @@ public static class Asconaead128
 	/// <param name="associatedData">Associated data (0 - N bytes)</param>
 	/// <param name="nonce">Nonce (16 bytes)</param>
 	/// <param name="key">Key (16 bytes)</param>
-	/// <exception cref="ArgumentException"></exception>
+	/// <exception cref="ArgumentException">If streams cannot be processed, or nonce doesn't have correct amount of bytes or key doesn't have correct amount of bytes</exception>
 	public static async Task EncryptAsync(Stream messageInput, Stream encryptedOutput, ReadOnlyMemory<byte> associatedData, ReadOnlyMemory<byte> nonce, ReadOnlyMemory<byte> key)
 	{
 		if (!messageInput.CanRead)
@@ -630,6 +630,7 @@ public static class Asconaead128
 	/// <param name="nonce">Nonce (16 bytes)</param>
 	/// <param name="key">Key (16 bytes)</param>
 	/// <returns>Decrypted byte array (size is 16 bytes less than encrypted bytes's size)</returns>
+	/// <exception cref="ArgumentException">If input does not have enough bytes, or nonce doesn't have correct amount of bytes or key doesn't have correct amount of bytes</exception>
 	public static byte[] Decrypt(ReadOnlySpan<byte> encryptedBytes, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key)
 	{
 		if (encryptedBytes.Length < CRYPTO_ABYTES)
@@ -668,7 +669,7 @@ public static class Asconaead128
 	/// <param name="nonce">Nonce (16 bytes)</param>
 	/// <param name="key">Key (16 bytes)</param>
 	/// <returns>0 on success; Otherwise failure</returns>
-	/// <exception cref="ArgumentException"></exception>
+	/// <exception cref="ArgumentException">If input does not have enough bytes, or nonce doesn't have correct amount of bytes or key doesn't have correct amount of bytes</exception>
 	public static int Decrypt(Stream encryptedInput, Stream decryptedOutput, ReadOnlyMemory<byte> associatedData, ReadOnlyMemory<byte> nonce, ReadOnlyMemory<byte> key)
 	{
 		if (!encryptedInput.CanRead)
@@ -784,7 +785,7 @@ public static class Asconaead128
 	/// <param name="nonce">Nonce (16 bytes)</param>
 	/// <param name="key">Key (16 bytes)</param>
 	/// <returns>0 on success; Otherwise failure</returns>
-	/// <exception cref="ArgumentException"></exception>
+	/// <exception cref="ArgumentException">If input does not have enough bytes, or nonce doesn't have correct amount of bytes or key doesn't have correct amount of bytes</exception>
 	public static async Task<int> DecryptAsync(Stream encryptedInput, Stream decryptedOutput, ReadOnlyMemory<byte> associatedData, ReadOnlyMemory<byte> nonce, ReadOnlyMemory<byte> key)
 	{
 		if (!encryptedInput.CanRead)

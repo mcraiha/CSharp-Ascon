@@ -224,4 +224,17 @@ public class Asconhash256Tests
 		// Assert
 		Assert.That(argumentException1!.Message, Is.EqualTo("Stream for hash operation must be readable!"));
 	}
+
+	[Test, Description("Test out incorrect parameters async")]
+	public async Task IncorrectParametersAsyncTest()
+	{
+		// Arrange
+		NonReadableStream nonReadableStream = new NonReadableStream();
+
+		// Act
+		var argumentException1 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconhash256.HashBytesAsync(nonReadableStream) );
+
+		// Assert
+		Assert.That(argumentException1!.Message, Is.EqualTo("Stream for hash operation must be readable!"));
+	}
 }

@@ -96,7 +96,7 @@ public class Asconhash256Tests
 	public void GenKatTestLowLevel()
 	{
 		// Arrange
-		List<byte> input = new List<byte>(); // This will be modified in every loop
+		List<byte> input = new List<byte>(capacity: 1026); // This will be modified in every loop
 		int count = 1;
 		byte byteToAdd = 0;
 
@@ -128,7 +128,7 @@ public class Asconhash256Tests
 	public void GenKatTestFancyByteArrays()
 	{
 		// Arrange
-		List<byte> input = new List<byte>(); // This will be modified in every loop
+		List<byte> input = new List<byte>(capacity: 1026); // This will be modified in every loop
 		int count = 1;
 		byte byteToAdd = 0;
 
@@ -158,7 +158,7 @@ public class Asconhash256Tests
 	public void GenKatTestFancyStreams()
 	{
 		// Arrange
-		List<byte> input = new List<byte>(); // This will be modified in every loop
+		List<byte> input = new List<byte>(capacity: 1026); // This will be modified in every loop
 		int count = 1;
 		byte byteToAdd = 0;
 
@@ -187,7 +187,7 @@ public class Asconhash256Tests
 	public async Task GenKatTestFancyStreamsAsync()
 	{
 		// Arrange
-		List<byte> input = new List<byte>(); // This will be modified in every loop
+		List<byte> input = new List<byte>(capacity: 1026); // This will be modified in every loop
 		int count = 1;
 		byte byteToAdd = 0;
 

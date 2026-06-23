@@ -397,6 +397,19 @@ public class Asconaead128Tests
 		Assert.That(argumentException4!.Message, Is.EqualTo("Key must be 16 bytes"));
 	}
 
+	[Test, Description("Test out incorrect decryption tag issue")]
+	public void IncorrectDecryptTagTest()
+	{
+		// Arrange
+
+		// Act
+		byte[] encrypted16BytesPlusTag = Asconaead128.Encrypt(messageOf16Bytes, new byte[1] {0}, nonce, key);
+		var argumentException1 = Assert.Throws<Exception>(() => Asconaead128.Decrypt(encrypted16BytesPlusTag, emptyAssociatedData, nonce, key));
+
+		// Assert
+		Assert.That(argumentException1!.Message, Is.EqualTo("Tag verification failed, either parameters are incorrect or data has been corrupted"));
+	}
+
 	[Test, Description("Test out incorrect decryption parameters")]
 	public void IncorrectDecryptParametersTest()
 	{

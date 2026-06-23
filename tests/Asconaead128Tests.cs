@@ -433,6 +433,40 @@ public class Asconaead128Tests
 		Assert.That(argumentException7!.Message, Is.EqualTo("Key must be 16 bytes"));
 	}
 
+	[Test, Description("Test out not enough bytes for decrypt")]
+	public void NotEnoughInputForDecryptTest()
+	{
+		// Arrange
+		byte[] encryptedMessageInvalid = "0123456789ABCDE"u8.ToArray();
+		byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
+		byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
+
+		// Act
+		int shouldBeMinusOne1 = Asconaead128.crypto_aead_decrypt(new byte[0], out int mlen1, null, encryptedMessageInvalid, encryptedMessageInvalid.Length, longAssociatedData, longAssociatedData.Length, nonceValid, keyValid);
+		int shouldBeMinusOne2 = Asconaead128.Decrypt(new MemoryStream(encryptedMessageInvalid), new MemoryStream(), longAssociatedData, nonceValid, keyValid);
+
+		// Assert
+		Assert.That(shouldBeMinusOne1, Is.EqualTo(-1));
+		Assert.That(mlen1, Is.EqualTo(-1));
+
+		Assert.That(shouldBeMinusOne2, Is.EqualTo(-1));
+	}
+
+	[Test, Description("Test out not enough bytes for decrypt async")]
+	public async Task NotEnoughInputForDecryptAsyncTest()
+	{
+		// Arrange
+		byte[] encryptedMessageInvalid = "0123456789ABCDE"u8.ToArray();
+		byte[] nonceValid = "MY_CAT_IS_NOT_IT"u8.ToArray(); 
+		byte[] keyValid = "DO_NOT_USE_IN_PR"u8.ToArray();
+
+		// Act
+		int shouldBeMinusOne1 = await Asconaead128.DecryptAsync(new MemoryStream(encryptedMessageInvalid), new MemoryStream(), longAssociatedData, nonceValid, keyValid);
+
+		// Assert
+		Assert.That(shouldBeMinusOne1, Is.EqualTo(-1));
+	}
+
 	[Test, Description("Test out incorrect decryption parameters async")]
 	public async Task IncorrectDecryptParametersAsyncTest()
 	{

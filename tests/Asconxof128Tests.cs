@@ -15,6 +15,8 @@ public class Asconxof128Tests
 		//(new byte[] {0x4F, 0x43, 0xB1, 0x13, 0xEF, 0x4F, 0xAD, 0x75, 0x25, 0x4A, 0xF6, 0xFD, 0xB4, 0x35, 0xA5, 0x87, 0x46, 0x2F, 0x98, 0xA4, 0xFC, 0x70, 0xA6, 0x64, 0xFA, 0x35, 0xB7, 0x94, 0x63, 0x6F, 0x94, 0xCE}, new byte[] { 0x8F, 0x54, 0x3F, 0x18, 0x68, 0x3D, 0x3B, 0x2F, 0xD0, 0x72, 0x2B, 0xEC, 0x60, 0x9C, 0xF3, 0x2C }),
 	};
 
+	private static readonly string expectedKat = File.ReadAllText("LWC_XOF_KAT_128_512.txt");
+
 	[SetUp]
 	public void Setup()
 	{
@@ -83,8 +85,8 @@ public class Asconxof128Tests
 		}
 	}
 
-	[Test, Description("Test out GenKat inputs")]
-	public void GenKatTest()
+	[Test, Description("Test out GenKat inputs with crypto_hash")]
+	public void GenKatTestLowLevel()
 	{
 		// Arrange
 		List<byte> input = new List<byte>(); // This will be modified in every loop
@@ -94,8 +96,6 @@ public class Asconxof128Tests
 		byte[] tempBytes = new byte[64];
 
 		StringWriter sw = new StringWriter();
-
-		string expected = File.ReadAllText("LWC_XOF_KAT_128_512.txt");
 
 		// Act
 		for (; count < 1026; count++)
@@ -114,7 +114,97 @@ public class Asconxof128Tests
 
 		// Assert
 		//Console.WriteLine(sw.ToString());
-		Assert.That(sw.ToString(), Is.EqualTo(expected));
+		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
+	}
+
+	[Test, Description("Test out GenKat inputs with fancy API using byte arrays")]
+	public void GenKatTestFancyByteArrays()
+	{
+		// Arrange
+		List<byte> input = new List<byte>(); // This will be modified in every loop
+		int count = 1;
+		byte byteToAdd = 0;
+
+		StringWriter sw = new StringWriter();
+
+		// Act
+		for (; count < 1026; count++)
+		{
+			byte[] inputArray = input.ToArray();
+
+			byte[] tempBytes = Asconxof128.HashBytes(inputArray, wantedHashLengthInBytes: 64);
+			sw.Write($"Count = {count}\n");
+			sw.Write($"Msg = {Convert.ToHexString(inputArray)}\n");
+			sw.Write($"MD = {Convert.ToHexString(tempBytes)}\n");
+			sw.Write("\n");
+
+			input.Add(byteToAdd);
+			byteToAdd++;
+		}
+
+		// Assert
+		//Console.WriteLine(sw.ToString());
+		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
+	}
+
+	[Test, Description("Test out GenKat inputs with fancy API using streams")]
+	public void GenKatTestFancyStreams()
+	{
+		// Arrange
+		List<byte> input = new List<byte>(); // This will be modified in every loop
+		int count = 1;
+		byte byteToAdd = 0;
+
+		StringWriter sw = new StringWriter();
+
+		// Act
+		for (; count < 1026; count++)
+		{
+			MemoryStream inputStream = new MemoryStream(input.ToArray());
+
+			byte[] tempBytes = Asconxof128.HashBytes(inputStream, wantedHashLengthInBytes: 64);
+			sw.Write($"Count = {count}\n");
+			sw.Write($"Msg = {Convert.ToHexString(inputStream.ToArray())}\n");
+			sw.Write($"MD = {Convert.ToHexString(tempBytes)}\n");
+			sw.Write("\n");
+
+			input.Add(byteToAdd);
+			byteToAdd++;
+		}
+
+		// Assert
+		//Console.WriteLine(sw.ToString());
+		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
+	}
+
+	[Test, Description("Test out GenKat inputs with fancy API using streams async")]
+	public async Task GenKatTestFancyStreamsAsync()
+	{
+		// Arrange
+		List<byte> input = new List<byte>(); // This will be modified in every loop
+		int count = 1;
+		byte byteToAdd = 0;
+
+		StringWriter sw = new StringWriter();
+
+		// Act
+		for (; count < 1026; count++)
+		{
+			MemoryStream inputStream = new MemoryStream(input.ToArray());
+
+			byte[] tempBytes = await Asconxof128.HashBytesAsync(inputStream, wantedHashLengthInBytes: 64);
+			sw.Write($"Count = {count}\n");
+			sw.Write($"Msg = {Convert.ToHexString(inputStream.ToArray())}\n");
+			sw.Write($"MD = {Convert.ToHexString(tempBytes)}\n");
+			sw.Write("\n");
+
+			input.Add(byteToAdd);
+			byteToAdd++;
+		}
+
+		// Assert
+		//Console.WriteLine(sw.ToString());
+		Assert.That(sw.ToString(), Is.EqualTo(expectedKat));
 	}
 
 	[Test, Description("Test out incorrect parameters")]

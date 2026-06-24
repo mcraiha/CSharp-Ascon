@@ -1,4 +1,4 @@
-## Version 1.0.1 (NOT RELEASED YET)
+## Version 1.0.1 (released 2026-06-24)
 - Add stream processing versions of methods (**FEATURE**)
 
 ## Version 1.0.0 (released 2026-06-04)

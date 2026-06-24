@@ -62,7 +62,7 @@ byte[] outputHash = new byte[outputLength];
 int returnValue = Asconxof128.crypto_hash(outputHash, input);
 ```
 
-### Fancy API example
+### Fancy API bytes example
 
 #### Ascon-AEAD128
 
@@ -105,4 +105,100 @@ int outputLength = 64;
 
 // Hash
 byte[] hash = Asconxof128.HashBytes(input, outputLength);
+```
+
+### Fancy API stream example
+
+#### Ascon-AEAD128
+
+```cs
+using CSAscon;
+
+FileStream inputStream = File.OpenRead("fileToEncrypt.txt");
+MemoryStream encryptedStream = new MemoryStream();
+
+ReadOnlySpan<byte> associatedData = "My associated data"u8;
+ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
+ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8; // Use better key in real life
+
+// Encrypt
+Asconaead128.Encrypt(inputStream, encryptedStream, associatedData, nonce, key);
+
+// Decrypt
+FileStream encryptedFileStream = File.OpenRead("mySecretFile.sec");
+MemoryStream decryptedStream = new MemoryStream();
+int shouldBeZero = Asconaead128.Decrypt(encryptedFileStream, decryptedStream, associatedData, nonce, key);
+```
+
+#### Ascon-Hash256
+
+```cs
+using CSAscon;
+
+FileStream inputStream = File.OpenRead("holiday.jpg");
+
+// Hash
+byte[] hash = Asconhash256.HashBytes(inputStream);
+```
+
+(the hash is always 32 bytes / 256 bits)
+
+#### Ascon-XOF128
+
+```cs
+using CSAscon;
+
+FileStream inputStream = File.OpenRead("holiday.jpg");
+int outputLength = 64;
+
+// Hash
+byte[] hash = Asconxof128.HashBytes(inputStream, outputLength);
+```
+
+### Fancy API stream async example
+
+#### Ascon-AEAD128
+
+```cs
+using CSAscon;
+
+FileStream inputStream = File.OpenRead("fileToEncrypt.txt");
+MemoryStream encryptedStream = new MemoryStream();
+
+ReadOnlySpan<byte> associatedData = "My associated data"u8;
+ReadOnlySpan<byte> nonce = "MY_CAT_IS_NOT_IT"u8;
+ReadOnlySpan<byte> key = "DO_NOT_USE_IN_PR"u8; // Use better key in real life
+
+// Encrypt
+await Asconaead128.EncryptAsync(inputStream, encryptedStream, associatedData, nonce, key);
+
+// Decrypt
+FileStream encryptedFileStream = File.OpenRead("mySecretFile.sec");
+MemoryStream decryptedStream = new MemoryStream();
+int shouldBeZero = await Asconaead128.DecryptAsync(encryptedFileStream, decryptedStream, associatedData, nonce, key);
+```
+
+#### Ascon-Hash256
+
+```cs
+using CSAscon;
+
+FileStream inputStream = File.OpenRead("holiday.jpg");
+
+// Hash
+byte[] hash = await Asconhash256.HashBytesAsync(inputStream);
+```
+
+(the hash is always 32 bytes / 256 bits)
+
+#### Ascon-XOF128
+
+```cs
+using CSAscon;
+
+FileStream inputStream = File.OpenRead("holiday.jpg");
+int outputLength = 64;
+
+// Hash
+byte[] hash = await Asconxof128.HashBytesAsync(inputStream, outputLength);
 ```

@@ -1,6 +1,6 @@
 # CSharp-Ascon
 
-Managed C# (CSharp) implementation of [Ascon](https://ascon.iaik.tugraz.at/index.html) (Ascon-AEAD128, Ascon-Hash256 and Ascon-XOF128). Ascon is standardized as NIST SP 800-232: https://csrc.nist.gov/pubs/sp/800/232/final
+Managed C# (CSharp) implementation of [Ascon](https://ascon.iaik.tugraz.at/index.html) (**Ascon-AEAD128**, **Ascon-Hash256** and **Ascon-XOF128**). Ascon is standardized as **NIST SP 800-232**: https://csrc.nist.gov/pubs/sp/800/232/final
 
 ## Build status
 

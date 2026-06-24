@@ -121,6 +121,20 @@ int outputLength = 64;
 byte[] hash = Asconxof128.HashBytes(input, outputLength);
 ```
 
+## Unit tests
+
+You can run unit tests by moving to [tests](tests) folder and executing
+
+```bash
+dotnet test
+```
+
+If you want to get test coverage results, you can execute
+
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+```
+
 ## Porting story
 
 Code is ported from **opt64** versions of the C code. So all methods operate 8 bytes (64 bits) at time.

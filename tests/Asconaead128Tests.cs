@@ -383,11 +383,11 @@ public class Asconaead128Tests
 		nonWriteableStream.Close();
 
 		// Act
-		var argumentException1 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
-		var argumentException2 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
+		var argumentException1 = await Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
+		var argumentException2 = await Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
 
-		var argumentException3 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
-		var argumentException4 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
+		var argumentException3 = await Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
+		var argumentException4 = await Assert.ThrowsAsync<ArgumentException>(async () => await Asconaead128.EncryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
 
 		// Assert
 		Assert.That(argumentException1!.Message, Is.EqualTo("Input stream for encrypt operation must be readable!"));
@@ -494,11 +494,11 @@ public class Asconaead128Tests
 		nonWriteableStream.Close();
 
 		// Act
-		var argumentException1 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
-		var argumentException2 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
+		var argumentException1 = await Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(nonReadableStream, new MemoryStream(), associatedDataValid, nonceValid, keyValid) );
+		var argumentException2 = await Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), nonWriteableStream, associatedDataValid, nonceValid, keyValid) );
 
-		var argumentException3 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
-		var argumentException4 = Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
+		var argumentException3 = await Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, new byte[0], keyValid) );
+		var argumentException4 = await Assert.ThrowsAsync<ArgumentException>(() => Asconaead128.DecryptAsync(new MemoryStream(), new MemoryStream(), associatedDataValid, nonceValid, new byte[0]) );
 
 		// Assert
 		Assert.That(argumentException1!.Message, Is.EqualTo("Input stream for decrypt operation must be readable!"));

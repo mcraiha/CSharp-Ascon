@@ -232,7 +232,7 @@ public class Asconhash256Tests
 		NonReadableStream nonReadableStream = new NonReadableStream();
 
 		// Act
-		var argumentException1 = Assert.ThrowsAsync<ArgumentException>(async () => await Asconhash256.HashBytesAsync(nonReadableStream) );
+		var argumentException1 = await Assert.ThrowsAsync<ArgumentException>(async () => await Asconhash256.HashBytesAsync(nonReadableStream) );
 
 		// Assert
 		Assert.That(argumentException1!.Message, Is.EqualTo("Stream for hash operation must be readable!"));

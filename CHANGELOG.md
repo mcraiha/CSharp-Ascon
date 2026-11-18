@@ -1,3 +1,7 @@
+## Version 1.1.0 (released 2026-11-18)
+- Support net11.0
+- Drop support for .NET 8 (**BREAKING**)
+
 ## Version 1.0.1 (released 2026-06-24)
 - Add stream processing versions of methods (**FEATURE**)
 

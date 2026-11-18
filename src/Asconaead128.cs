@@ -703,7 +703,7 @@ public static class Asconaead128
 		const int nr = (ASCON_AEAD_RATE == 8) ? 6 : 8;
 		/* full ciphertext blocks */
 		Memory<byte> primaryBuffer = new byte[ASCON_AEAD_RATE]; // This can be optimized
-		Memory<byte> secondaryyBuffer = new byte[ASCON_AEAD_RATE];
+		Memory<byte> secondaryBuffer = new byte[ASCON_AEAD_RATE];
 		Memory<byte> tagBuffer = new byte[CRYPTO_ABYTES];
 
 		int readAmount = encryptedInput.ReadAtLeast(primaryBuffer.Span, ASCON_AEAD_RATE, throwOnEndOfStream: false);
@@ -717,7 +717,7 @@ public static class Asconaead128
 		bool loop = true;
 		while (loop)
 		{
-			readAmount = encryptedInput.ReadAtLeast(secondaryyBuffer.Span, ASCON_AEAD_RATE, throwOnEndOfStream: false);
+			readAmount = encryptedInput.ReadAtLeast(secondaryBuffer.Span, ASCON_AEAD_RATE, throwOnEndOfStream: false);
 
 			if (readAmount == ASCON_AEAD_RATE)
 			{
@@ -733,13 +733,13 @@ public static class Asconaead128
 				
 				P(s, nr);
 
-				secondaryyBuffer.CopyTo(primaryBuffer);
+				secondaryBuffer.CopyTo(primaryBuffer);
 			}
 			else
 			{
 				loop = false;
 
-				secondaryyBuffer.Slice(0, readAmount).CopyTo(tagBuffer.Slice(CRYPTO_ABYTES - readAmount));
+				secondaryBuffer.Slice(0, readAmount).CopyTo(tagBuffer.Slice(CRYPTO_ABYTES - readAmount));
 				primaryBuffer.Slice(readAmount, CRYPTO_ABYTES - readAmount).CopyTo(tagBuffer);
 
 				/* final ciphertext block */
@@ -819,7 +819,7 @@ public static class Asconaead128
 		const int nr = (ASCON_AEAD_RATE == 8) ? 6 : 8;
 		/* full ciphertext blocks */
 		Memory<byte> primaryBuffer = new byte[ASCON_AEAD_RATE]; // This can be optimized
-		Memory<byte> secondaryyBuffer = new byte[ASCON_AEAD_RATE];
+		Memory<byte> secondaryBuffer = new byte[ASCON_AEAD_RATE];
 		Memory<byte> tagBuffer = new byte[CRYPTO_ABYTES];
 
 		int readAmount = await encryptedInput.ReadAtLeastAsync(primaryBuffer, ASCON_AEAD_RATE, throwOnEndOfStream: false);
@@ -833,7 +833,7 @@ public static class Asconaead128
 		bool loop = true;
 		while (loop)
 		{
-			readAmount = await encryptedInput.ReadAtLeastAsync(secondaryyBuffer, ASCON_AEAD_RATE, throwOnEndOfStream: false);
+			readAmount = await encryptedInput.ReadAtLeastAsync(secondaryBuffer, ASCON_AEAD_RATE, throwOnEndOfStream: false);
 
 			if (readAmount == ASCON_AEAD_RATE)
 			{
@@ -849,13 +849,13 @@ public static class Asconaead128
 				
 				P(s, nr);
 
-				secondaryyBuffer.CopyTo(primaryBuffer);
+				secondaryBuffer.CopyTo(primaryBuffer);
 			}
 			else
 			{
 				loop = false;
 
-				secondaryyBuffer.Slice(0, readAmount).CopyTo(tagBuffer.Slice(CRYPTO_ABYTES - readAmount));
+				secondaryBuffer.Slice(0, readAmount).CopyTo(tagBuffer.Slice(CRYPTO_ABYTES - readAmount));
 				primaryBuffer.Slice(readAmount, CRYPTO_ABYTES - readAmount).CopyTo(tagBuffer);
 
 				/* final ciphertext block */

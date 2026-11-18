@@ -123,7 +123,7 @@ public class Asconxof128Bench
 	public byte[] Hash1048576Bytes() => Asconxof128.HashBytes(msg1048576, 16);
 }
 
-class Program
+public class Program
 {
 	private static readonly string help = """
 	Please select benchmark:
@@ -133,7 +133,7 @@ class Program
 
 	e.g. dotnet run -c Release 1
 	""";
-	static void Main(string[] args)
+	public static void Main(string[] args)
 	{
 		if (args.Length < 1)
 		{
